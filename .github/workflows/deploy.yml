@@ -1,4 +1,4 @@
-name: Deploy Trail de Venasque to Hostinger
+name: Deploy Trail de Venasque to Hostinger (FTP)
 
 on:
   push:
@@ -17,43 +17,35 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🗜️ Archive static site
-        run: |
-          tar -czf site.tar.gz \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='.gitignore' \
-            --exclude='README.md' \
-            --exclude='site.tar.gz' \
-            .
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-      - name: 🔐 Vérification de la clé SSH
+      - name: 📦 Prepare static files
         run: |
-          if [ -z "${{ secrets.HOSTINGER_SSH_KEY }}" ]; then
-            echo "❌ Le secret HOSTINGER_SSH_KEY n'est pas encore configuré."
-            echo "Ajoutez-le dans Settings > Secrets and variables > Actions."
+          mkdir -p _deploy
+          cp index.html gpx_data.js poster-trail-de-venasque-2027.png \
+             favicon.svg favicon.ico apple-touch-icon.png \
+             image_f67662.jpg venasque1.jpg venasque2.jpg venasque3.jpg \
+             logo_foyer_laique.png logo_papa_team_running.png logo_running_conseil.png \
+             VENASQUE_2027_*.gpx _deploy/
+
+      - name: 🔐 Vérification des secrets FTP
+        run: |
+          if [ -z "${{ secrets.HOSTINGER_FTP_HOST }}" ] || [ -z "${{ secrets.HOSTINGER_FTP_USER }}" ] || [ -z "${{ secrets.HOSTINGER_FTP_PASSWORD }}" ]; then
+            echo "❌ Secrets manquants : configurez HOSTINGER_FTP_HOST, HOSTINGER_FTP_USER et HOSTINGER_FTP_PASSWORD dans Settings > Secrets and variables > Actions."
             exit 1
           fi
 
-      - name: 🚀 Deploy to Hostinger subdomain
+      - name: 🚀 Deploy to Hostinger via FTP
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
-          HOST: ${{ secrets.HOSTINGER_HOST }}
-          PORT: ${{ secrets.HOSTINGER_PORT }}
-          USER: ${{ secrets.HOSTINGER_USER }}
-          REMOTE_DIR: ${{ secrets.HOSTINGER_REMOTE_DIR }}
+          HOSTINGER_FTP_HOST: ${{ secrets.HOSTINGER_FTP_HOST }}
+          HOSTINGER_FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+          HOSTINGER_FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          HOSTINGER_FTP_PORT: ${{ secrets.HOSTINGER_FTP_PORT }}
+          HOSTINGER_FTP_DIR: ${{ secrets.HOSTINGER_FTP_DIR }}
+          HOSTINGER_FTP_SECURE: ${{ secrets.HOSTINGER_FTP_SECURE }}
         run: |
-          TARGET_HOST="${HOST:-89.117.169.57}"
-          TARGET_PORT="${PORT:-65002}"
-          TARGET_USER="${USER:-u488549652}"
-          TARGET_DIR="${REMOTE_DIR:-domains/runvaucluse.fr/public_html/trail-de-venasque}"
-
-          mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-          ssh -p "$TARGET_PORT" -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new "$TARGET_USER@$TARGET_HOST" "mkdir -p '$TARGET_DIR'"
-          scp -P "$TARGET_PORT" -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new site.tar.gz "$TARGET_USER@$TARGET_HOST:$TARGET_DIR/"
-          ssh -p "$TARGET_PORT" -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new "$TARGET_USER@$TARGET_HOST" "cd '$TARGET_DIR' && tar -xzf site.tar.gz && rm site.tar.gz"
-
-          echo "✅ Déploiement réussi sur https://trail-de-venasque.runvaucluse.fr/"
+          npm install --no-save basic-ftp
+          node .github/scripts/deploy-ftp.mjs

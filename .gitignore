@@ -4,6 +4,9 @@ Thumbs.db
 *.tar.gz
 *.zip
 .env*
+_deploy/
+node_modules/
+package*.json
 
 # Anciens visuels et tracés 2026 non utilisés en production
 affiche_trail_venasque_2027.png
