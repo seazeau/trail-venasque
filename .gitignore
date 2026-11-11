@@ -1,0 +1,17 @@
+# Fichiers système et temporaires
+.DS_Store
+Thumbs.db
+*.tar.gz
+*.zip
+.env*
+
+# Anciens visuels et tracés 2026 non utilisés en production
+affiche_trail_venasque_2027.png
+photo_crest.png
+photo_finish.png
+photo_forest.png
+photo_village.png
+logo_venasque_2026_lignes_pures.svg
+VENASQUE 2026 10K OFFICIEL.gpx
+VENASQUE 2026 20K OFFICIEL.gpx
+VENASQUE 2026 30K OFFICIEL.gpx

@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trail de Venasque 2027 | Dimanche 7 Mars 2027 • Site Officiel</title>
+    <meta name="description" content="Trail de Venasque — Dimanche 7 Mars 2027. 3 parcours de 7 km, 13 km, 24 km et Marche 7 km au profit de l'école de Venasque (Vaucluse). Profils, cartes GPX, infos pratiques et résultats.">
+    <meta name="theme-color" content="#C06448">
+    <link rel="canonical" href="https://trail-de-venasque.runvaucluse.fr/">
+    <meta property="og:url" content="https://trail-de-venasque.runvaucluse.fr/">
+    <meta property="og:title" content="Trail de Venasque 2027 | Dimanche 7 Mars 2027">
+    <meta property="og:description" content="Courez à Venasque dans l'un des plus beaux villages de France : 7 km, 13 km, 24 km et Marche 7 km au profit de l'école.">
+    <meta property="og:image" content="https://trail-de-venasque.runvaucluse.fr/poster-trail-de-venasque-2027.png">
+    <meta property="og:type" content="website">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2027-2">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=2027-2" sizes="any">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2027-2">
+
+    <!-- Bibliothèques : Tailwind CSS, Chart.js et Leaflet.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="gpx_data.js?v=2027"></script>
+
+    <!-- Typographie Montserrat (droite & italique) + Caveat (signature Organisé par) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500;1,600;1,700;1,900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'venasque-paper': '#FFFFFF',
+                        'venasque-cream': '#FAF5F0',
+                        'venasque-sand': '#F2DFD0',
+                        'venasque-ochre': '#D59A7B',
+                        'venasque-terracotta': '#C06448',
+                        'venasque-terracotta-dark': '#9C4D35',
+                        'venasque-espresso': '#5C3E31',
+                        'venasque-ink': '#3A251D',
+                        'venasque-muted': '#7E6256',
+                        'venasque-border': '#E8D6C8'
+                    },
+                    fontFamily: {
+                        'sans': ['Montserrat', 'sans-serif'],
+                        'script': ['Caveat', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 84px;
+        }
+        .hero-canvas {
+            background: radial-gradient(circle at 82% 24%, rgba(242, 223, 208, 0.55) 0%, rgba(250, 245, 240, 0.75) 45%, #FFFFFF 100%);
+        }
+        .nav-link {
+            position: relative;
+            transition: color 0.2s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #C06448;
+            transition: width 0.25s ease;
+        }
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        .nav-link:hover,
+        .nav-link.active {
+            color: #C06448;
+        }
+
+        /* Styles personnalisés pour Leaflet (DA Terracotta & Crème) */
+        .leaflet-bar {
+            border: 1px solid #E8D6C8 !important;
+            box-shadow: 0 8px 20px rgba(92, 62, 49, 0.14) !important;
+            border-radius: 12px !important;
+            overflow: hidden;
+        }
+        .leaflet-bar a {
+            background-color: #FFFFFF !important;
+            color: #5C3E31 !important;
+            border-bottom: 1px solid #E8D6C8 !important;
+            transition: all 0.2s ease;
+        }
+        .leaflet-bar a:hover {
+            background-color: #C06448 !important;
+            color: #FFFFFF !important;
+        }
+        .leaflet-container {
+            background-color: #FAF5F0 !important;
+            font-family: 'Montserrat', sans-serif !important;
+        }
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background-color: #FFFFFF !important;
+            color: #3A251D !important;
+            border: 1px solid #C06448;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px rgba(92, 62, 49, 0.18) !important;
+        }
+        .leaflet-popup-content b {
+            color: #C06448;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FAF5F0; }
+        ::-webkit-scrollbar-thumb { background: #D59A7B; border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #C06448; }
+    </style>
+</head>
+<body class="bg-venasque-paper text-venasque-ink font-sans antialiased selection:bg-venasque-terracotta selection:text-white">
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-venasque-border px-4 sm:px-6 py-3.5 flex justify-between items-center shadow-sm">
+        <a href="#accueil" class="flex items-center gap-3 hover:opacity-85 transition cursor-pointer shrink-0">
+            <!-- LOGO VECTORIEL GÉOMÉTRIQUE : VILLAGE PERCHÉ & SENTIER TERRACOTTA -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 365 60" class="h-9 sm:h-10 md:h-11 w-auto">
+                <polygon points="5,45 23,30 23,25 27,25 27,15 31,10 35,15 35,25 46,25 50,30 60,45" fill="#F2DFD0" />
+                <path d="M 5,45 L 23,30 L 23,25 L 27,25 L 27,15 L 31,10 L 35,15 L 35,25 L 46,25 L 50,30 L 60,45 L 80,45" fill="none" stroke="#5C3E31" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M 12,55 Q 35,50 25,40 T 48,25" fill="none" stroke="#C06448" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+                <text x="95" y="33" font-family="Montserrat, sans-serif" font-weight="900" font-size="21" fill="#C06448" letter-spacing="0.5">TRAIL DE VENASQUE</text>
+                <text x="96" y="49" font-family="Montserrat, sans-serif" font-weight="800" font-size="10.5" fill="#5C3E31" letter-spacing="3.5">DIMANCHE 7 MARS 2027</text>
+            </svg>
+        </a>
+
+        <div class="hidden lg:flex items-center space-x-6 xl:space-x-7 font-bold text-[11px] uppercase tracking-widest text-venasque-espresso">
+            <a href="#accueil" class="nav-link">Accueil</a>
+            <a href="#defis" class="nav-link">Parcours</a>
+            <a href="#infos" class="nav-link">Infos</a>
+            <a href="#resultats" class="nav-link">Résultats</a>
+            <a href="#photos" class="nav-link">Photos</a>
+            <a href="#faq" class="nav-link">FAQ</a>
+            <a href="#contact" class="nav-link">Contact</a>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="#inscription" class="hidden sm:inline-flex items-center gap-2 bg-venasque-terracotta text-white px-5 py-2.5 rounded-full font-extrabold text-xs uppercase tracking-wider hover:bg-venasque-ink transition shadow-sm">
+                <span>S'inscrire</span>
+            </a>
+
+            <!-- Hamburger Button -->
+            <button id="mobileMenuBtn" type="button" class="block lg:hidden p-2 rounded-xl bg-venasque-cream border border-venasque-border text-venasque-espresso hover:text-venasque-terracotta hover:border-venasque-terracotta transition focus:outline-none cursor-pointer" aria-label="Ouvrir le menu" aria-expanded="false">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path id="hamburgerPath" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div id="mobileMenu" class="fixed inset-0 z-40 hidden bg-venasque-cream/98 backdrop-blur-xl flex flex-col justify-center items-center gap-5 pt-16 transition-all duration-300 opacity-0 transform -translate-y-3 overflow-y-auto py-10 text-venasque-espresso">
+        <a href="#accueil" onclick="toggleMobileMenu()" class="text-xl font-black uppercase tracking-wider hover:text-venasque-terracotta transition">Accueil</a>
+        <a href="#defis" onclick="toggleMobileMenu()" class="text-xl font-black uppercase tracking-wider hover:text-venasque-terracotta transition">Parcours</a>
+        <a href="#infos" onclick="toggleMobileMenu()" class="text-xl font-black uppercase tracking-wider hover:text-venasque-terracotta transition">Infos Pratiques</a>
+        <a href="#resultats" onclick="toggleMobileMenu()" class="text-xl font-black uppercase tracking-wider hover:text-venasque-terracotta transition">Résultats 2026</a>
+        <a href="#photos" onclick="toggleMobileMenu()" class="text-xl font-black uppercase tracking-wider hover:text-venasque-terracotta transition">Photos</a>
+        <a href="#faq" onclick="toggleMobileMenu()" class="text-xl font-black uppercase tracking-wider hover:text-venasque-terracotta transition">FAQ</a>
+        <a href="#partenaires" onclick="toggleMobileMenu()" class="text-xl font-black uppercase tracking-wider hover:text-venasque-terracotta transition">Partenaires</a>
+        <a href="#contact" onclick="toggleMobileMenu()" class="text-xl font-black uppercase tracking-wider hover:text-venasque-terracotta transition">Contact</a>
+        <a href="#inscription" onclick="toggleMobileMenu()" class="mt-3 bg-venasque-terracotta text-white px-8 py-3.5 rounded-full font-extrabold text-sm uppercase hover:bg-venasque-ink transition shadow-lg">Inscription</a>
+    </div>
+
+    <!-- ACCUEIL / HERO : DA AFFICHE OFFICIELLE -->
+    <header id="accueil" class="hero-canvas min-h-screen flex flex-col justify-center px-4 sm:px-6 pt-20 sm:pt-24 pb-8 sm:pb-10 relative overflow-hidden border-b border-venasque-border">
+        <!-- Silhouette architecturale géométrique de Venasque en filigrane -->
+        <svg aria-hidden="true" viewBox="0 0 1440 240" preserveAspectRatio="none" class="pointer-events-none absolute bottom-0 left-0 w-full h-32 sm:h-44 opacity-40">
+            <polygon points="0,240 0,200 180,175 320,190 480,140 560,152 640,95 660,55 680,95 740,108 820,138 980,165 1180,145 1440,185 1440,240" fill="#F2DFD0" />
+            <polygon points="0,240 0,220 260,198 520,170 760,145 1020,185 1260,172 1440,205 1440,240" fill="#E8D6C8" opacity="0.55" />
+            <path d="M 0,200 L 180,175 L 320,190 L 480,140 L 560,152 L 640,95 L 660,55 L 680,95 L 740,108 L 820,138 L 980,165 L 1180,145 L 1440,185" fill="none" stroke="#C06448" stroke-width="1.5" opacity="0.35" />
+        </svg>
+
+        <div class="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-10 items-center">
+            <!-- Colonne gauche : Typographie Affiche & Compte à rebours -->
+            <div class="md:col-span-7 text-center md:text-left">
+                <div class="inline-flex items-center gap-2 bg-venasque-cream border border-venasque-border text-venasque-espresso px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-extrabold uppercase tracking-widest mb-4">
+                    <span class="w-2 h-2 rounded-full bg-venasque-terracotta animate-pulse"></span>
+                    Venasque • Plus Beaux Villages de France
+                </div>
+
+                <h1 class="text-4xl sm:text-5xl xl:text-[4rem] font-black uppercase tracking-tight leading-[0.95] text-venasque-terracotta">
+                    Trail de Venasque
+                </h1>
+                <p class="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-tight text-venasque-espresso mt-2">
+                    Dimanche 7 Mars 2027
+                </p>
+
+                <p class="text-sm sm:text-lg lg:text-xl text-venasque-muted font-medium italic mt-3 max-w-2xl mx-auto md:mx-0">
+                    3 parcours au cœur des falaises et sentiers du Vaucluse : <strong class="text-venasque-espresso not-italic font-extrabold whitespace-nowrap">7 km</strong>, <strong class="text-venasque-espresso not-italic font-extrabold whitespace-nowrap">13 km</strong>, <strong class="text-venasque-espresso not-italic font-extrabold whitespace-nowrap">24 km</strong> &amp; <strong class="text-venasque-terracotta whitespace-nowrap">Marche 7 km</strong>.
+                </p>
+
+                <!-- COMPTE À REBOURS DYNAMIQUE -->
+                <div id="countdownWrapper" class="mt-6 mb-6">
+                    <p class="text-[10px] font-extrabold uppercase tracking-[0.28em] text-venasque-muted mb-2.5">Départ dans</p>
+                    <div class="grid grid-cols-4 gap-2 sm:gap-3 max-w-md mx-auto md:mx-0">
+                        <div class="bg-white border border-venasque-border rounded-2xl py-2.5 px-2 shadow-sm">
+                            <div id="cd-days" class="text-2xl sm:text-3xl lg:text-4xl font-black text-venasque-terracotta tabular-nums">--</div>
+                            <div class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-venasque-muted mt-1">Jours</div>
+                        </div>
+                        <div class="bg-white border border-venasque-border rounded-2xl py-2.5 px-2 shadow-sm">
+                            <div id="cd-hours" class="text-2xl sm:text-3xl lg:text-4xl font-black text-venasque-espresso tabular-nums">--</div>
+                            <div class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-venasque-muted mt-1">Heures</div>
+                        </div>
+                        <div class="bg-white border border-venasque-border rounded-2xl py-2.5 px-2 shadow-sm">
+                            <div id="cd-minutes" class="text-2xl sm:text-3xl lg:text-4xl font-black text-venasque-espresso tabular-nums">--</div>
+                            <div class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-venasque-muted mt-1">Min</div>
+                        </div>
+                        <div class="bg-white border border-venasque-border rounded-2xl py-2.5 px-2 shadow-sm">
+                            <div id="cd-seconds" class="text-2xl sm:text-3xl lg:text-4xl font-black text-venasque-terracotta tabular-nums">--</div>
+                            <div class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-venasque-muted mt-1">Sec</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTAS -->
+                <div class="flex flex-col sm:flex-row justify-center md:justify-start items-center gap-3">
+                    <a href="#defis" class="w-full sm:w-auto bg-venasque-terracotta text-white px-7 py-3.5 rounded-2xl font-extrabold text-xs sm:text-sm hover:bg-venasque-ink hover:-translate-y-0.5 transition shadow-lg uppercase tracking-wider text-center">
+                        Découvrir les parcours
+                    </a>
+                    <a href="#inscription" class="w-full sm:w-auto bg-white border-2 border-venasque-espresso text-venasque-espresso px-7 py-3 rounded-2xl font-extrabold text-xs sm:text-sm hover:bg-venasque-espresso hover:text-white transition shadow-sm uppercase tracking-wider text-center">
+                        Inscription
+                    </a>
+                </div>
+
+                <!-- RUBAN INFOS RAPIDES -->
+                <div class="mt-6 pt-5 border-t border-venasque-border grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px] font-bold uppercase tracking-wider text-venasque-espresso">
+                    <div class="flex items-center justify-center md:justify-start gap-2">
+                        <span class="text-venasque-terracotta">●</span> 7 km • 13 km • 24 km • Marche
+                    </div>
+                    <div class="flex items-center justify-center md:justify-start gap-2">
+                        <span class="text-venasque-terracotta">●</span> Départ Place de la Fontaine
+                    </div>
+                    <div class="flex items-center justify-center md:justify-start gap-2">
+                        <span class="text-venasque-terracotta">●</span> Au profit de l'école
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite : L'Affiche Officielle 2027 complète sans recadrage -->
+            <div class="md:col-span-5 flex flex-col items-center justify-center">
+                <div class="group relative w-fit max-w-full bg-white p-2.5 sm:p-3 rounded-3xl border border-venasque-border shadow-[0_24px_60px_-15px_rgba(92,62,49,0.22)] cursor-pointer hover:border-venasque-terracotta hover:-translate-y-1 transition-all duration-300" onclick="openLightbox('poster-trail-de-venasque-2027.png', 'Affiche Officielle du Trail de Venasque — Dimanche 7 Mars 2027')">
+                    <div class="rounded-2xl overflow-hidden bg-white">
+                        <img src="poster-trail-de-venasque-2027.png" alt="Affiche officielle Trail de Venasque Dimanche 7 Mars 2027 — 7km, 13km, 24km et Marche 7km" class="block w-auto max-w-full h-auto max-h-[65vh] md:max-h-[min(620px,calc(100vh-165px))] object-contain mx-auto">
+                    </div>
+                    <div class="mt-2.5 flex items-center justify-between gap-4 px-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-venasque-espresso">
+                        <span class="text-venasque-terracotta">Affiche Officielle 2027</span>
+                        <span class="text-venasque-muted group-hover:text-venasque-terracotta transition">Agrandir ↗</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION DÉFIS -->
+    <section id="defis" class="py-20 sm:py-24 bg-venasque-cream border-b border-venasque-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-14">
+                <span class="text-venasque-terracotta text-xs font-extrabold uppercase tracking-[0.3em]">Édition 2027 • 3 Parcours + Marche</span>
+                <h2 class="text-4xl sm:text-5xl font-black mt-2 uppercase text-venasque-espresso tracking-tight">Les Défis 2027</h2>
+                <p class="text-sm text-venasque-muted max-w-2xl mx-auto mt-3">
+                    Sélectionnez un parcours ci-dessous pour afficher son profil altimétrique détaillé et explorer son tracé sur la carte interactive.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+                <!-- 24K -->
+                <div id="card-24k" class="course-card bg-white p-7 border border-venasque-border rounded-3xl hover:border-venasque-terracotta transition-all duration-300 flex flex-col justify-between shadow-sm hover:shadow-xl">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-venasque-sand text-venasque-espresso border border-venasque-ochre/40">Départ 08h30</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-venasque-muted">Exigeant</span>
+                        </div>
+                        <div class="text-venasque-terracotta font-black text-6xl tracking-tighter">24K</div>
+                        <p class="font-bold text-venasque-espresso uppercase text-xs tracking-wider mt-1 italic">Le Grand Défi des Crêtes</p>
+                        <ul class="mt-5 space-y-2 text-xs text-venasque-muted border-t border-venasque-border pt-4">
+                            <li class="flex justify-between"><span>Distance GPX</span> <strong class="text-venasque-espresso">24,8 km</strong></li>
+                            <li class="flex justify-between"><span>Dénivelé +</span> <strong class="text-venasque-espresso">~880 m D+</strong></li>
+                            <li class="flex justify-between"><span>Ravitaillements</span> <strong class="text-venasque-espresso">2 + Arrivée</strong></li>
+                            <li class="flex justify-between"><span>Terrain</span> <strong class="text-venasque-espresso">Crêtes &amp; Single</strong></li>
+                        </ul>
+                    </div>
+                    <button type="button" onclick="genererProfilExact('24k', true)" class="w-full bg-venasque-terracotta text-white py-3.5 rounded-xl font-extrabold text-xs uppercase tracking-widest hover:bg-venasque-ink transition shadow-sm mt-6 cursor-pointer">
+                        Profil &amp; Carte GPX
+                    </button>
+                </div>
+
+                <!-- 13K -->
+                <div id="card-13k" class="course-card bg-white p-7 border border-venasque-border rounded-3xl hover:border-venasque-terracotta transition-all duration-300 flex flex-col justify-between shadow-sm hover:shadow-xl">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-venasque-cream text-venasque-espresso border border-venasque-border">Départ 09h30</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-venasque-muted">Intermédiaire</span>
+                        </div>
+                        <div class="text-venasque-terracotta font-black text-6xl tracking-tighter">13K</div>
+                        <p class="font-bold text-venasque-espresso uppercase text-xs tracking-wider mt-1 italic">L'Intermédiaire des Sous-Bois</p>
+                        <ul class="mt-5 space-y-2 text-xs text-venasque-muted border-t border-venasque-border pt-4">
+                            <li class="flex justify-between"><span>Distance GPX</span> <strong class="text-venasque-espresso">12,7 km</strong></li>
+                            <li class="flex justify-between"><span>Dénivelé +</span> <strong class="text-venasque-espresso">~450 m D+</strong></li>
+                            <li class="flex justify-between"><span>Ravitaillements</span> <strong class="text-venasque-espresso">1 à 2 + Arrivée</strong></li>
+                            <li class="flex justify-between"><span>Terrain</span> <strong class="text-venasque-espresso">Pinède &amp; Relances</strong></li>
+                        </ul>
+                    </div>
+                    <button type="button" onclick="genererProfilExact('13k', true)" class="w-full bg-venasque-terracotta text-white py-3.5 rounded-xl font-extrabold text-xs uppercase tracking-widest hover:bg-venasque-ink transition shadow-sm mt-6 cursor-pointer">
+                        Profil &amp; Carte GPX
+                    </button>
+                </div>
+
+                <!-- 7K -->
+                <div id="card-7k" class="course-card bg-white p-7 border border-venasque-border rounded-3xl hover:border-venasque-terracotta transition-all duration-300 flex flex-col justify-between shadow-sm hover:shadow-xl">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-venasque-cream text-venasque-espresso border border-venasque-border">Départ 10h00</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-venasque-muted">Découverte</span>
+                        </div>
+                        <div class="text-venasque-terracotta font-black text-6xl tracking-tighter">7K</div>
+                        <p class="font-bold text-venasque-espresso uppercase text-xs tracking-wider mt-1 italic">Le Rapide du Village</p>
+                        <ul class="mt-5 space-y-2 text-xs text-venasque-muted border-t border-venasque-border pt-4">
+                            <li class="flex justify-between"><span>Distance GPX</span> <strong class="text-venasque-espresso">6,9 km</strong></li>
+                            <li class="flex justify-between"><span>Dénivelé +</span> <strong class="text-venasque-espresso">~210 m D+</strong></li>
+                            <li class="flex justify-between"><span>Ravitaillements</span> <strong class="text-venasque-espresso">1 Eau + Arrivée</strong></li>
+                            <li class="flex justify-between"><span>Terrain</span> <strong class="text-venasque-espresso">Roulant &amp; Panoramique</strong></li>
+                        </ul>
+                    </div>
+                    <button type="button" onclick="genererProfilExact('7k', true)" class="w-full bg-venasque-terracotta text-white py-3.5 rounded-xl font-extrabold text-xs uppercase tracking-widest hover:bg-venasque-ink transition shadow-sm mt-6 cursor-pointer">
+                        Profil &amp; Carte GPX
+                    </button>
+                </div>
+
+                <!-- MARCHE 7KM -->
+                <div id="card-marche7k" class="course-card bg-venasque-terracotta text-white p-7 rounded-3xl shadow-md flex flex-col justify-between border border-venasque-terracotta-dark/20 transition-all duration-300 hover:shadow-xl">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-venasque-ink text-white">Départ 11h00</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-white/85">Sans chrono</span>
+                        </div>
+                        <div class="font-black text-5xl sm:text-6xl tracking-tighter">7K</div>
+                        <p class="font-bold uppercase text-xs tracking-wider mt-1 italic text-venasque-sand">La Marche Solidaire</p>
+                        <ul class="mt-5 space-y-2 text-xs font-medium text-white/90 border-t border-white/20 pt-4">
+                            <li class="flex justify-between"><span>Distance GPX</span> <strong class="text-white">7,3 km</strong></li>
+                            <li class="flex justify-between"><span>Dénivelé +</span> <strong class="text-white">~160 m D+</strong></li>
+                            <li class="flex justify-between"><span>Public</span> <strong class="text-white">Familles &amp; Amis</strong></li>
+                            <li class="flex justify-between"><span>Bénéfices</span> <strong class="text-white">100% École</strong></li>
+                        </ul>
+                    </div>
+                    <button type="button" onclick="genererProfilExact('marche7k', true)" class="w-full bg-venasque-ink text-white py-3.5 rounded-xl text-xs font-extrabold uppercase tracking-widest mt-6 hover:bg-white hover:text-venasque-ink transition shadow-sm cursor-pointer">
+                        Profil &amp; Carte GPX
+                    </button>
+                </div>
+            </div>
+
+            <!-- BANDEAU INFO MARCHE (affiché automatiquement sur Marche 7K ou via fermeture) -->
+            <div id="zoneMarche" class="hidden mt-8 bg-venasque-sand/60 text-venasque-ink p-6 sm:p-8 rounded-3xl shadow-lg border-2 border-venasque-terracotta">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest bg-venasque-terracotta text-white px-3 py-1 rounded-full">11h00 • Place de la Fontaine</span>
+                        <h3 class="text-2xl font-black uppercase text-venasque-espresso mt-3">Marche 7 km (7,3 km GPX) — En famille au cœur de Venasque</h3>
+                        <p class="text-sm font-medium text-venasque-ink/85 mt-2 max-w-3xl leading-relaxed">
+                            Un parcours accessible de 7,3 km (~160 m D+) sans chronométrage pour profiter des paysages et falaises de Venasque à votre rythme. Idéal pour les familles, enfants et accompagnateurs souhaitant soutenir les projets de l'école du village.
+                        </p>
+                    </div>
+                    <button type="button" onclick="toggleMarcheInfo()" class="shrink-0 bg-venasque-espresso text-white px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider hover:bg-venasque-terracotta transition cursor-pointer">
+                        Fermer ×
+                    </button>
+                </div>
+            </div>
+
+            <!-- ZONE EXPLORATEUR DE PARCOURS (Profil + Carte GPX) -->
+            <div id="zoneGraphique" class="mt-12 bg-white border border-venasque-border p-5 sm:p-8 rounded-3xl shadow-xl transition-all duration-500">
+                <!-- En-tête de l'explorateur -->
+                <div class="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6 pb-6 border-b border-venasque-border">
+                    <div class="text-center lg:text-left">
+                        <div class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-venasque-muted mb-1">
+                            <span>Explorateur interactif</span>
+                            <span>•</span>
+                            <span class="text-venasque-terracotta">Tracés officiels 2027 • Mathieu Olivier (Team PAPA)</span>
+                        </div>
+                        <h3 id="titre-graphique" class="text-2xl sm:text-3xl font-black uppercase text-venasque-espresso">Profil Altimétrique &amp; Carte - 24 km</h3>
+                    </div>
+
+                    <!-- Sélecteur rapide + Bouton GPX -->
+                    <div class="flex flex-wrap justify-center items-center gap-2 sm:gap-3">
+                        <div class="inline-flex flex-wrap justify-center bg-venasque-cream p-1 rounded-xl border border-venasque-border">
+                            <button type="button" onclick="genererProfilExact('24k', false)" data-tab="24k" class="course-tab px-4 py-2 rounded-lg text-xs font-extrabold uppercase transition cursor-pointer">24K</button>
+                            <button type="button" onclick="genererProfilExact('13k', false)" data-tab="13k" class="course-tab px-4 py-2 rounded-lg text-xs font-extrabold uppercase transition cursor-pointer">13K</button>
+                            <button type="button" onclick="genererProfilExact('7k', false)" data-tab="7k" class="course-tab px-4 py-2 rounded-lg text-xs font-extrabold uppercase transition cursor-pointer">7K</button>
+                            <button type="button" onclick="genererProfilExact('marche7k', false)" data-tab="marche7k" class="course-tab px-4 py-2 rounded-lg text-xs font-extrabold uppercase transition cursor-pointer">Marche 7K</button>
+                        </div>
+
+                        <a id="btnTelechargerGPX" href="#" download class="inline-flex items-center gap-2 bg-venasque-terracotta text-white px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider hover:bg-venasque-ink transition shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            <span>Télécharger GPX</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Indicateurs clés du parcours sélectionné -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                    <div class="bg-venasque-cream border border-venasque-border rounded-2xl p-3.5 text-center">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-venasque-muted">Distance 2027</div>
+                        <div id="kpi-distance" class="text-lg sm:text-xl font-black text-venasque-espresso mt-0.5">24,8 km</div>
+                    </div>
+                    <div class="bg-venasque-cream border border-venasque-border rounded-2xl p-3.5 text-center">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-venasque-muted">Dénivelé Positif</div>
+                        <div id="kpi-denivele" class="text-lg sm:text-xl font-black text-venasque-terracotta mt-0.5">~880 m D+</div>
+                    </div>
+                    <div class="bg-venasque-cream border border-venasque-border rounded-2xl p-3.5 text-center">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-venasque-muted">Altitude Min / Max</div>
+                        <div id="kpi-altitude" class="text-lg sm:text-xl font-black text-venasque-espresso mt-0.5">189 m / 633 m</div>
+                    </div>
+                    <div class="bg-venasque-cream border border-venasque-border rounded-2xl p-3.5 text-center">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-venasque-muted">Départ &amp; Ravitos</div>
+                        <div id="kpi-ravito" class="text-lg sm:text-xl font-black text-venasque-espresso mt-0.5">08h30 • 2 + Arr.</div>
+                    </div>
+                </div>
+
+                <!-- Grille côte à côte sur ordinateur, empilée sur mobile -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Graphique de dénivelé -->
+                    <div class="flex flex-col">
+                        <div class="flex justify-between items-center mb-2 px-1">
+                            <span class="text-xs font-bold uppercase tracking-wider text-venasque-espresso">Profil Altimétrique</span>
+                            <span class="text-[10px] text-venasque-terracotta font-semibold italic">Survolez la courbe pour repérer sur la carte</span>
+                        </div>
+                        <div class="w-full h-[320px] sm:h-[380px] bg-venasque-cream p-3 sm:p-4 rounded-2xl border border-venasque-border">
+                            <canvas id="chartRealiste"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Carte interactive Leaflet -->
+                    <div class="flex flex-col">
+                        <div class="flex flex-wrap justify-between items-center gap-2 mb-2 px-1">
+                            <span class="text-xs font-bold uppercase tracking-wider text-venasque-espresso">Carte Interactive du Tracé</span>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <button type="button" onclick="changerFondCarte('ign')" data-mapstyle="ign" class="map-style-btn px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-venasque-terracotta text-white cursor-pointer transition">Plan IGN</button>
+                                <button type="button" onclick="changerFondCarte('topo')" data-mapstyle="topo" class="map-style-btn px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-venasque-cream border border-venasque-border text-venasque-espresso hover:border-venasque-terracotta cursor-pointer transition">Relief</button>
+                                <button type="button" onclick="changerFondCarte('satellite')" data-mapstyle="satellite" class="map-style-btn px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-venasque-cream border border-venasque-border text-venasque-espresso hover:border-venasque-terracotta cursor-pointer transition">Satellite</button>
+                                <button type="button" onclick="changerFondCarte('osm')" data-mapstyle="osm" class="map-style-btn px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-venasque-cream border border-venasque-border text-venasque-espresso hover:border-venasque-terracotta cursor-pointer transition">OSM</button>
+                                <button type="button" onclick="recentrerCarte()" title="Recentrer le tracé" class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-venasque-sand text-venasque-espresso hover:bg-venasque-terracotta hover:text-white cursor-pointer transition">Recadrer</button>
+                            </div>
+                        </div>
+                        <div class="w-full h-[320px] sm:h-[380px] rounded-2xl border border-venasque-border overflow-hidden relative">
+                            <div id="mapGPX" class="w-full h-full z-10"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-center text-[10px] mt-6 text-venasque-muted uppercase tracking-widest">
+                    Tracé technique conçu par Mathieu Olivier (Team PAPA) • Points vert (Départ) &amp; rouge (Arrivée) Place de la Fontaine
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- INFOS PRATIQUES & AFFICHE 2027 -->
+    <section id="infos" class="py-20 sm:py-24 bg-white relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+            <div class="text-center mb-16">
+                <span class="text-venasque-terracotta text-xs font-extrabold uppercase tracking-[0.3em]">Tout savoir avant le départ</span>
+                <h2 class="text-4xl sm:text-5xl font-black mt-2 uppercase text-venasque-espresso">Infos Pratiques</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 lg:gap-10 text-left pt-4">
+                <!-- CARTE 1 : HORAIRES -->
+                <div class="relative bg-venasque-cream p-8 rounded-3xl border border-venasque-border shadow-sm hover:-translate-y-1.5 hover:border-venasque-terracotta transition-all duration-300 group mt-6 md:mt-0">
+                    <div class="absolute -top-7 left-8 bg-venasque-terracotta text-white p-3.5 rounded-2xl shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2"></path><path d="M5 3 2 6"></path><path d="m22 6-3-3"></path><path d="M12 2v3"></path></svg>
+                    </div>
+                    <div class="pt-6">
+                        <h3 class="font-black text-xl mb-4 uppercase text-venasque-espresso tracking-wider">Date &amp; Horaires</h3>
+                        <p class="text-xs font-extrabold text-venasque-terracotta mb-4 bg-white border border-venasque-border inline-block px-3 py-1 rounded-full uppercase">Dimanche 7 Mars 2027</p>
+                        <ul class="text-sm text-venasque-ink leading-relaxed space-y-2.5 mb-4">
+                            <li class="flex items-center gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-venasque-terracotta"></div> Retrait dossards : dès <strong>07h30</strong></li>
+                            <li class="flex items-center gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-venasque-terracotta"></div> <span class="font-black text-venasque-terracotta">24 km</span> : Départ <strong>08h30</strong></li>
+                            <li class="flex items-center gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-venasque-terracotta"></div> <span class="font-black text-venasque-terracotta">13 km</span> : Départ <strong>09h30</strong></li>
+                            <li class="flex items-center gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-venasque-terracotta"></div> <span class="font-black text-venasque-terracotta">7 km</span> : Départ <strong>10h00</strong></li>
+                            <li class="flex items-center gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-venasque-terracotta"></div> <span class="font-black text-venasque-terracotta">Marche 7 km</span> : Départ <strong>11h00</strong></li>
+                        </ul>
+                        <p class="text-[11px] text-venasque-muted uppercase tracking-widest border-t border-venasque-border pt-4 mt-4">Départs Place de la Fontaine • Venasque</p>
+                    </div>
+                </div>
+
+                <!-- CARTE 2 : RESTAURATION (Conforme à l'affiche officielle) -->
+                <div class="relative bg-venasque-cream p-8 rounded-3xl border border-venasque-border shadow-sm hover:-translate-y-1.5 hover:border-venasque-terracotta transition-all duration-300 group mt-8 md:mt-0">
+                    <div class="absolute -top-7 left-8 bg-venasque-terracotta text-white p-3.5 rounded-2xl shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>
+                    </div>
+                    <div class="pt-6">
+                        <h3 class="font-black text-xl mb-4 uppercase text-venasque-espresso tracking-wider">Restauration à l'arrivée</h3>
+                        <p class="text-sm text-venasque-muted leading-relaxed mb-5 italic">
+                            Restauration festive prévue à l'arrivée avec le <strong class="text-venasque-espresso not-italic">Foyer Laïque de Venasque</strong> pour partager un moment convivial après l'effort :
+                        </p>
+                        <ul class="text-sm text-venasque-ink leading-relaxed space-y-2.5 mb-4 font-semibold">
+                            <li class="flex items-center gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-venasque-terracotta"></div> Grillades chaudes</li>
+                            <li class="flex items-center gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-venasque-terracotta"></div> Frites maison</li>
+                            <li class="flex items-center gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-venasque-terracotta"></div> Crêpes gourmandes</li>
+                            <li class="flex items-center gap-2.5"><div class="w-1.5 h-1.5 rounded-full bg-venasque-terracotta"></div> Boissons &amp; grand ravitaillement coureurs</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- CARTE 3 : SOLIDARITÉ -->
+                <div class="relative bg-venasque-cream p-8 rounded-3xl border border-venasque-border shadow-sm hover:-translate-y-1.5 hover:border-venasque-terracotta transition-all duration-300 group mt-8 md:mt-0">
+                    <div class="absolute -top-7 left-8 bg-venasque-terracotta text-white p-3.5 rounded-2xl shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+                    </div>
+                    <div class="pt-6">
+                        <h3 class="font-black text-xl mb-4 uppercase text-venasque-espresso tracking-wider">Solidarité</h3>
+                        <p class="text-sm text-venasque-muted leading-relaxed mb-5">
+                            Courir à Venasque, c'est aussi courir pour la bonne cause. L'organisation est <strong class="text-venasque-espresso">100% bénévole</strong>.
+                        </p>
+                        <div class="bg-venasque-sand/65 p-4 rounded-2xl border border-venasque-ochre/45">
+                            <p class="text-xs font-extrabold uppercase tracking-wider text-venasque-terracotta mb-1.5">Objectif 2027</p>
+                            <p class="text-xs text-venasque-ink leading-relaxed">
+                                L'intégralité des bénéfices de la course financera directement les projets scolaires et périscolaires de l'école du village de Venasque.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOC AFFICHE OFFICIELLE & ACCÈS / RÈGLEMENT -->
+            <div class="mt-14 bg-venasque-cream border border-venasque-border rounded-3xl p-6 sm:p-8 lg:p-10 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="group relative max-w-[300px] w-full bg-white p-2.5 rounded-2xl overflow-hidden border border-venasque-border shadow-lg cursor-pointer hover:border-venasque-terracotta hover:-translate-y-1 transition-all duration-300" onclick="openLightbox('poster-trail-de-venasque-2027.png', 'Affiche Officielle du Trail de Venasque — Dimanche 7 Mars 2027')">
+                        <div class="rounded-xl overflow-hidden bg-white">
+                            <img src="poster-trail-de-venasque-2027.png" alt="Affiche officielle Trail de Venasque 2027" class="w-full h-auto object-contain block">
+                        </div>
+                        <div class="mt-2 text-center text-[10px] font-extrabold uppercase tracking-widest text-venasque-terracotta">
+                            Cliquer pour agrandir
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 text-left space-y-5">
+                    <span class="text-[11px] font-extrabold uppercase tracking-widest text-venasque-terracotta bg-white border border-venasque-border px-3 py-1 rounded-full inline-block">Accès &amp; Règlement</span>
+                    <h3 class="text-2xl sm:text-3xl font-black uppercase text-venasque-espresso leading-tight">
+                        Accueil au cœur du village de Venasque (84210)
+                    </h3>
+                    <p class="text-sm text-venasque-muted leading-relaxed">
+                        Village perché entre Monts de Vaucluse et Mont Ventoux, Venasque vous accueille sur la <strong class="text-venasque-espresso">Place de la Fontaine</strong> dès 07h30 pour le retrait des dossards. Des parkings fléchés par nos bénévoles vous attendent à l'entrée du village ainsi qu'une consigne sacs gratuite près du départ.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-venasque-ink">
+                        <div class="bg-white border border-venasque-border rounded-xl p-3.5">
+                            <strong class="text-venasque-terracotta uppercase block mb-1">Éco-Responsabilité</strong>
+                            Aucun gobelet jetable aux ravitaillements : pensez à votre éco-gobelet personnel.
+                        </div>
+                        <div class="bg-white border border-venasque-border rounded-xl p-3.5">
+                            <strong class="text-venasque-terracotta uppercase block mb-1">Inscriptions 100% en ligne</strong>
+                            Pas d'inscription sur place le dimanche matin pour garantir sécurité et fluidité.
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 pt-2">
+                        <button type="button" onclick="openReglementModal()" class="inline-flex items-center gap-2 bg-venasque-terracotta text-white px-6 py-3.5 rounded-xl font-extrabold text-xs uppercase tracking-widest hover:bg-venasque-ink transition shadow-sm cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            Consulter le règlement
+                        </button>
+                        <a href="poster-trail-de-venasque-2027.png" download="Affiche_Officielle_Trail_Venasque_2027.png" class="inline-flex items-center gap-2 bg-white border-2 border-venasque-espresso text-venasque-espresso px-6 py-3.5 rounded-xl font-extrabold text-xs uppercase tracking-widest hover:bg-venasque-espresso hover:text-white transition shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Télécharger l'affiche
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION RÉSULTATS -->
+    <section id="resultats" class="py-20 sm:py-24 bg-venasque-cream border-y border-venasque-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-12">
+                <span class="text-venasque-terracotta text-xs font-extrabold uppercase tracking-[0.3em]">Dimanche 8 Mars 2026 • Archive Officielle</span>
+                <h2 class="text-4xl sm:text-5xl font-black mt-2 uppercase text-venasque-espresso">Résultats 2026</h2>
+                <p class="text-xs text-venasque-muted mt-2">Top Finishers par distance (distances édition 2026 : 30K, 20K, 10K)</p>
+            </div>
+
+            <!-- Barre de recherche et filtres -->
+            <div class="bg-white border border-venasque-border rounded-3xl p-5 sm:p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm">
+                <!-- Filtres par distance -->
+                <div class="flex flex-wrap justify-center md:justify-start items-center gap-2 w-full md:w-auto">
+                    <button type="button" onclick="setResultFilter('30K')" class="btn-res-filter px-6 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-venasque-terracotta text-white transition hover:scale-105 cursor-pointer" data-filter="30K">30K</button>
+                    <button type="button" onclick="setResultFilter('20K')" class="btn-res-filter px-6 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-venasque-cream text-venasque-espresso border border-venasque-border transition hover:border-venasque-terracotta hover:scale-105 cursor-pointer" data-filter="20K">20K</button>
+                    <button type="button" onclick="setResultFilter('10K')" class="btn-res-filter px-6 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-venasque-cream text-venasque-espresso border border-venasque-border transition hover:border-venasque-terracotta hover:scale-105 cursor-pointer" data-filter="10K">10K</button>
+                    <span id="resultsCountBadge" class="ml-2 text-[11px] font-bold text-venasque-muted uppercase tracking-wider"></span>
+                </div>
+
+                <!-- Recherche par nom -->
+                <div class="relative w-full md:w-80">
+                    <input type="text" id="searchResultats" oninput="searchResultats()" placeholder="Rechercher un coureur, club, dossard..." class="w-full bg-venasque-cream border border-venasque-border py-3.5 pl-4 pr-16 rounded-xl outline-none focus:border-venasque-terracotta transition text-sm text-venasque-ink placeholder-venasque-muted/70">
+                    <button id="clearSearchBtn" type="button" onclick="clearResultSearch()" class="hidden absolute right-10 top-1/2 -translate-y-1/2 text-venasque-muted hover:text-venasque-terracotta font-black text-lg px-1 cursor-pointer" aria-label="Effacer la recherche">×</button>
+                    <svg class="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-venasque-muted pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </div>
+
+            <!-- Tableau des résultats (Desktop) + Cartes (Mobile) -->
+            <div class="bg-white border border-venasque-border rounded-3xl overflow-hidden shadow-md">
+                <div class="hidden md:block overflow-x-auto">
+                    <table class="w-full text-left border-collapse border-spacing-0">
+                        <thead>
+                            <tr class="border-b border-venasque-border bg-venasque-sand/45 text-venasque-espresso text-xs uppercase tracking-wider font-extrabold">
+                                <th class="py-4 px-6">Rang</th>
+                                <th class="py-4 px-6">Nom</th>
+                                <th class="py-4 px-6">Dossard</th>
+                                <th class="py-4 px-6">Distance</th>
+                                <th class="py-4 px-6">Catégorie</th>
+                                <th class="py-4 px-6">Temps</th>
+                                <th class="py-4 px-6">Club / Ville</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultatsTableBody" class="text-sm font-medium">
+                            <!-- Rempli dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Vue mobile optimisée en cartes -->
+                <div id="resultatsMobileBody" class="md:hidden divide-y divide-venasque-border">
+                    <!-- Rempli dynamiquement -->
+                </div>
+
+                <div id="noResultsMessage" class="hidden text-center py-12 text-venasque-muted italic text-sm">
+                    Aucun coureur ne correspond à votre recherche sur cette distance.
+                </div>
+            </div>
+
+            <!-- Boutons officiels Nikrome -->
+            <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="https://www.nikrome.com/resultats_evenement.php?event_id=202603081" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex justify-center items-center gap-3 bg-venasque-terracotta text-white px-8 py-4 rounded-2xl font-extrabold text-xs uppercase tracking-widest hover:bg-venasque-ink transition shadow-md hover:-translate-y-0.5 duration-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg>
+                    Classements Complets (Nikrome)
+                </a>
+                <a href="https://www.nikrome.com/fichiers/PDF/venasque26.pdf" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex justify-center items-center gap-3 bg-white border-2 border-venasque-espresso text-venasque-espresso px-8 py-3.5 rounded-2xl font-extrabold text-xs uppercase tracking-widest hover:bg-venasque-espresso hover:text-white transition shadow-sm duration-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"></path></svg>
+                    Télécharger les Résultats (PDF)
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION PHOTOS -->
+    <section id="photos" class="py-20 sm:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-14">
+                <span class="text-venasque-terracotta text-xs font-extrabold uppercase tracking-[0.3em]">Village &amp; Sentiers • Vaucluse</span>
+                <h2 class="text-4xl sm:text-5xl font-black mt-2 uppercase text-venasque-espresso">Venasque en Images</h2>
+                <p class="text-xs text-venasque-muted mt-2">Découvrez les paysages réels du parcours et retrouvez les ~80 photos de la course publiées par la Team PAPA sur Facebook</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Photo 1 -->
+                <div class="group relative overflow-hidden rounded-3xl border border-venasque-border bg-venasque-cream p-2 cursor-pointer shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-venasque-terracotta hover:shadow-xl" onclick="openLightboxByIndex(0)">
+                    <div class="aspect-[4/3] w-full overflow-hidden rounded-2xl">
+                        <img src="image_f67662.jpg" alt="Vue panoramique du village perché de Venasque" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-110">
+                    </div>
+                    <div class="p-3.5">
+                        <p class="font-black text-sm uppercase text-venasque-terracotta">Venasque Perché</p>
+                        <p class="text-xs text-venasque-muted mt-1 leading-relaxed">Vue panoramique sur le village historique et les Monts de Vaucluse.</p>
+                    </div>
+                </div>
+
+                <!-- Photo 2 -->
+                <div class="group relative overflow-hidden rounded-3xl border border-venasque-border bg-venasque-cream p-2 cursor-pointer shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-venasque-terracotta hover:shadow-xl" onclick="openLightboxByIndex(1)">
+                    <div class="aspect-[4/3] w-full overflow-hidden rounded-2xl">
+                        <img src="venasque1.jpg" alt="Clocher et ruelles de Venasque" class="h-full w-full object-cover object-[50%_42%] transition-transform duration-500 group-hover:scale-110">
+                    </div>
+                    <div class="p-3.5">
+                        <p class="font-black text-sm uppercase text-venasque-terracotta">Cœur du Village</p>
+                        <p class="text-xs text-venasque-muted mt-1 leading-relaxed">Le clocher de l'église et la montée vers le centre historique de Venasque.</p>
+                    </div>
+                </div>
+
+                <!-- Photo 3 -->
+                <div class="group relative overflow-hidden rounded-3xl border border-venasque-border bg-venasque-cream p-2 cursor-pointer shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-venasque-terracotta hover:shadow-xl" onclick="openLightboxByIndex(2)">
+                    <div class="aspect-[4/3] w-full overflow-hidden rounded-2xl">
+                        <img src="venasque2.jpg" alt="Sentier calcaire et cairn sur les hauteurs de Venasque" class="h-full w-full object-cover object-[50%_75%] transition-transform duration-500 group-hover:scale-110">
+                    </div>
+                    <div class="p-3.5">
+                        <p class="font-black text-sm uppercase text-venasque-terracotta">Sentiers Calcaires</p>
+                        <p class="text-xs text-venasque-muted mt-1 leading-relaxed">Passage rocailleux et cairn sur les monotraces au-dessus de la vallée.</p>
+                    </div>
+                </div>
+
+                <!-- Photo 4 -->
+                <div class="group relative overflow-hidden rounded-3xl border border-venasque-border bg-venasque-cream p-2 cursor-pointer shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-venasque-terracotta hover:shadow-xl" onclick="openLightboxByIndex(3)">
+                    <div class="aspect-[4/3] w-full overflow-hidden rounded-2xl">
+                        <img src="venasque3.jpg" alt="Falaises de Venasque, forêt et Mont Ventoux" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-110">
+                    </div>
+                    <div class="p-3.5">
+                        <p class="font-black text-sm uppercase text-venasque-terracotta">Falaises &amp; Ventoux</p>
+                        <p class="text-xs text-venasque-muted mt-1 leading-relaxed">Chênes verts, falaises provençales et vue dégagée sur le Mont Ventoux.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bouton Diaporama / Lien direct album Facebook -->
+            <div class="mt-12 flex flex-wrap justify-center gap-4">
+                <button type="button" onclick="openLightboxByIndex(0)" class="inline-flex items-center gap-3 bg-venasque-terracotta text-white px-8 py-4 rounded-2xl font-extrabold text-xs sm:text-sm hover:bg-venasque-ink transition shadow-md uppercase tracking-widest hover:-translate-y-0.5 duration-300 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    Lancer le diaporama
+                </button>
+                <a href="https://www.facebook.com/permalink.php?story_fbid=pfbid0Aa7PAofJFfN9Ak6gLuW417QZiuDpCYMg7dDeHLXNMiF3t2R754XwyU17EYkS4vejl&amp;id=100092419316904" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-3 bg-venasque-cream border-2 border-venasque-espresso text-venasque-espresso px-8 py-4 rounded-2xl font-extrabold text-xs sm:text-sm hover:bg-venasque-espresso hover:text-white transition shadow-sm uppercase tracking-widest">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+                    Voir l'album complet (~80 photos)
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIGHTBOX GALLERY AMÉLIORÉE -->
+    <div id="photoLightbox" class="fixed inset-0 z-[60] hidden bg-venasque-ink/95 backdrop-blur-md flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <button type="button" onclick="closeLightbox()" class="absolute top-5 right-5 text-white hover:text-venasque-ochre transition cursor-pointer p-2 rounded-full bg-white/10" aria-label="Fermer">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <button id="lbPrevBtn" type="button" onclick="navigateLightbox(-1)" class="hidden sm:flex absolute left-5 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/15 hover:bg-venasque-terracotta text-white items-center justify-center font-black text-2xl transition cursor-pointer" aria-label="Photo précédente">‹</button>
+        <button id="lbNextBtn" type="button" onclick="navigateLightbox(1)" class="hidden sm:flex absolute right-5 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/15 hover:bg-venasque-terracotta text-white items-center justify-center font-black text-2xl transition cursor-pointer" aria-label="Photo suivante">›</button>
+
+        <div class="max-w-4xl w-full flex flex-col items-center gap-4">
+            <img id="lightboxImg" src="" alt="" class="max-h-[82vh] max-w-full rounded-2xl border border-white/20 shadow-2xl object-contain bg-white">
+            <div class="flex items-center gap-3">
+                <button id="lbPrevMobile" type="button" onclick="navigateLightbox(-1)" class="sm:hidden px-3 py-1.5 rounded-full bg-white/15 text-white font-black text-sm">‹</button>
+                <p id="lightboxCaption" class="text-white font-bold text-center text-xs sm:text-sm tracking-wider uppercase bg-white/10 border border-white/20 px-5 py-2.5 rounded-full"></p>
+                <button id="lbNextMobile" type="button" onclick="navigateLightbox(1)" class="sm:hidden px-3 py-1.5 rounded-full bg-white/15 text-white font-black text-sm">›</button>
+            </div>
+            <p id="lightboxCounter" class="text-[11px] font-bold uppercase tracking-widest text-venasque-sand"></p>
+        </div>
+    </div>
+
+    <!-- MODAL RÈGLEMENT OFFICIEL -->
+    <div id="reglementModal" class="fixed inset-0 z-[60] hidden bg-venasque-ink/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white border border-venasque-border rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-venasque-border flex justify-between items-center bg-venasque-cream">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-venasque-terracotta">Trail de Venasque • 7 Mars 2027</span>
+                    <h3 class="text-xl sm:text-2xl font-black uppercase text-venasque-espresso">Règlement Officiel (Synthèse)</h3>
+                </div>
+                <button type="button" onclick="closeReglementModal()" class="text-venasque-espresso hover:text-venasque-terracotta p-2 rounded-xl bg-white border border-venasque-border cursor-pointer" aria-label="Fermer le règlement">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-5 text-sm text-venasque-ink/85 leading-relaxed">
+                <div>
+                    <h4 class="font-black uppercase text-venasque-terracotta text-xs tracking-wider mb-1">1. Épreuves &amp; Horaires</h4>
+                    <p>Trois parcours trail et une marche solidaire au départ de la Place de la Fontaine le dimanche 7 mars 2027 : <strong>24 km</strong> (08h30), <strong>13 km</strong> (09h30), <strong>7 km</strong> (10h00) et <strong>Marche 7 km</strong> (11h00). Retrait des dossards dès 07h30.</p>
+                </div>
+                <div>
+                    <h4 class="font-black uppercase text-venasque-terracotta text-xs tracking-wider mb-1">2. Inscriptions &amp; Justificatifs</h4>
+                    <p>Inscriptions exclusivement en ligne sur la plateforme partenaire (Le-Sportif.com). Pour les courses chronométrées, une licence FFA valide ou un PPS (Parcours Prévention Santé) en cours de validité est requis selon la réglementation FFA 2027.</p>
+                </div>
+                <div>
+                    <h4 class="font-black uppercase text-venasque-terracotta text-xs tracking-wider mb-1">3. Semi-Autosuffisance &amp; Matériel</h4>
+                    <p>Les épreuves se déroulent en semi-autosuffisance. Prévoir au minimum 1 L d'eau (13 km / 24 km), téléphone portable chargé, sifflet, coupe-vent si météo fraîche/venteuse, et obligatoirement un <strong>éco-gobelet personnel</strong> (aucun gobelet jetable distribué).</p>
+                </div>
+                <div>
+                    <h4 class="font-black uppercase text-venasque-terracotta text-xs tracking-wider mb-1">4. Respect de la Nature &amp; Sécurité</h4>
+                    <p>Tout abandon de déchet hors des zones de ravitaillement entraîne une disqualification immédiate. Les coureurs s'engagent à respecter le balisage et les consignes des signaleurs bénévoles aux traversées routières.</p>
+                </div>
+                <div>
+                    <h4 class="font-black uppercase text-venasque-terracotta text-xs tracking-wider mb-1">5. Solidarité</h4>
+                    <p>Organisation 100% bénévole : l'intégralité des bénéfices est reversée aux projets de l'école de Venasque.</p>
+                </div>
+            </div>
+            <div class="p-5 border-t border-venasque-border bg-venasque-cream flex justify-end gap-3">
+                <button type="button" onclick="window.print()" class="px-5 py-2.5 rounded-xl border border-venasque-espresso text-venasque-espresso text-xs font-bold uppercase hover:bg-venasque-espresso hover:text-white transition cursor-pointer">Imprimer</button>
+                <button type="button" onclick="closeReglementModal()" class="px-6 py-2.5 rounded-xl bg-venasque-terracotta text-white text-xs font-extrabold uppercase hover:bg-venasque-ink transition cursor-pointer">J'ai compris</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION FAQ -->
+    <section id="faq" class="py-20 bg-venasque-cream border-t border-venasque-border relative z-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-12">
+                <span class="text-venasque-terracotta text-xs font-extrabold uppercase tracking-[0.3em]">Questions Fréquentes</span>
+                <h2 class="text-3xl sm:text-4xl font-black mt-2 uppercase text-venasque-espresso">FAQ Coureurs</h2>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Question 1 -->
+                <div class="bg-white border border-venasque-border rounded-2xl overflow-hidden transition-colors hover:border-venasque-terracotta">
+                    <button type="button" aria-expanded="false" class="w-full px-6 py-5 text-left font-bold flex justify-between items-center text-venasque-espresso hover:text-venasque-terracotta transition-colors focus:outline-none cursor-pointer" onclick="toggleFaq(this)">
+                        <span>Peut-on s'inscrire sur place le jour de la course ?</span>
+                        <svg class="w-5 h-5 shrink-0 transform transition-transform duration-300 chevron text-venasque-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-sm text-venasque-muted leading-relaxed border-t border-venasque-border pt-4">
+                        Non, pour des raisons d'organisation et de sécurité, toutes les inscriptions se font exclusivement en ligne sur le site partenaire (Le-Sportif.com). Aucune inscription sur place ne sera acceptée le dimanche matin.
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="bg-white border border-venasque-border rounded-2xl overflow-hidden transition-colors hover:border-venasque-terracotta">
+                    <button type="button" aria-expanded="false" class="w-full px-6 py-5 text-left font-bold flex justify-between items-center text-venasque-espresso hover:text-venasque-terracotta transition-colors focus:outline-none cursor-pointer" onclick="toggleFaq(this)">
+                        <span>Y a-t-il du matériel obligatoire ?</span>
+                        <svg class="w-5 h-5 shrink-0 transform transition-transform duration-300 chevron text-venasque-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-sm text-venasque-muted leading-relaxed border-t border-venasque-border pt-4">
+                        Oui. Les courses se déroulent en semi-autosuffisance. Il est vivement recommandé (et obligatoire selon la distance et la météo) d'avoir une réserve d'eau (min 1 L), un téléphone portable chargé, un sifflet, une veste adaptée au mistral et votre propre <strong>éco-gobelet</strong> pour les ravitaillements.
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="bg-white border border-venasque-border rounded-2xl overflow-hidden transition-colors hover:border-venasque-terracotta">
+                    <button type="button" aria-expanded="false" class="w-full px-6 py-5 text-left font-bold flex justify-between items-center text-venasque-espresso hover:text-venasque-terracotta transition-colors focus:outline-none cursor-pointer" onclick="toggleFaq(this)">
+                        <span>Comment se passent les ravitaillements sur le 7 km, 13 km et 24 km ?</span>
+                        <svg class="w-5 h-5 shrink-0 transform transition-transform duration-300 chevron text-venasque-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-sm text-venasque-muted leading-relaxed border-t border-venasque-border pt-4">
+                        Des ravitaillements solides et liquides sont prévus sur les parcours du <strong>13 km</strong> et du <strong>24 km</strong>. Le <strong>7 km</strong> dispose d'un point d'eau sur le tracé. Un grand ravitaillement d'arrivée attend tous les coureurs et marcheurs sur la Place de la Fontaine. Attention : <strong>aucun gobelet jetable</strong> ne sera fourni.
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="bg-white border border-venasque-border rounded-2xl overflow-hidden transition-colors hover:border-venasque-terracotta">
+                    <button type="button" aria-expanded="false" class="w-full px-6 py-5 text-left font-bold flex justify-between items-center text-venasque-espresso hover:text-venasque-terracotta transition-colors focus:outline-none cursor-pointer" onclick="toggleFaq(this)">
+                        <span>Où peut-on se garer ? Y a-t-il des consignes ou douches ?</span>
+                        <svg class="w-5 h-5 shrink-0 transform transition-transform duration-300 chevron text-venasque-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-sm text-venasque-muted leading-relaxed border-t border-venasque-border pt-4">
+                        Des parkings seront fléchés à l'entrée du village de Venasque. Suivez les indications des bénévoles. Il n'y aura pas de douches à l'arrivée, mais un espace non surveillé sera mis à disposition près de la ligne de départ pour déposer vos sacs (l'organisation décline toute responsabilité en cas de vol).
+                    </div>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="bg-white border border-venasque-border rounded-2xl overflow-hidden transition-colors hover:border-venasque-terracotta">
+                    <button type="button" aria-expanded="false" class="w-full px-6 py-5 text-left font-bold flex justify-between items-center text-venasque-espresso hover:text-venasque-terracotta transition-colors focus:outline-none cursor-pointer" onclick="toggleFaq(this)">
+                        <span>Comment rejoindre l'équipe de bénévoles ?</span>
+                        <svg class="w-5 h-5 shrink-0 transform transition-transform duration-300 chevron text-venasque-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-sm text-venasque-muted leading-relaxed border-t border-venasque-border pt-4">
+                        Nous avons toujours besoin de mains motivées (signaleurs, ravitaillements, remise des dossards, buvette) ! Cliquez sur « Devenir bénévole » dans la section ci-dessous ou écrivez-nous directement via le formulaire de contact.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION INSCRIPTION & BÉNÉVOLES : BANDEAU TERRACOTTA -->
+    <section id="inscription" class="py-20 sm:py-24 bg-venasque-terracotta text-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+            <!-- Coureurs -->
+            <div class="bg-venasque-ink text-white p-8 sm:p-10 rounded-3xl shadow-2xl flex flex-col justify-between text-center md:text-left">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-venasque-terracotta text-white inline-block mb-4">Coureurs &amp; Marcheurs</span>
+                    <h2 class="text-3xl sm:text-4xl font-black mb-4 uppercase tracking-tight">Prêt pour le défi 2027 ?</h2>
+                    <p class="text-sm text-white/80 leading-relaxed mb-6">
+                        Les inscriptions pour le <strong>7 mars 2027</strong> (7 km, 13 km, 24 km &amp; Marche 7 km) se feront en ligne sur notre partenaire <strong>Le-Sportif.com</strong>. Recevez le lien direct dès l'ouverture des dossards ou posez votre question à l'équipe.
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" onclick="preselectContact('Alerte ouverture inscriptions 2027')" class="flex-1 bg-venasque-terracotta text-white px-6 py-4 rounded-2xl font-extrabold text-sm hover:bg-white hover:text-venasque-ink transition shadow-lg uppercase tracking-wider cursor-pointer">
+                        Être prévenu à l'ouverture
+                    </button>
+                    <button type="button" onclick="openReglementModal()" class="bg-white/10 border border-white/25 text-white px-5 py-4 rounded-2xl font-bold text-xs hover:bg-white hover:text-venasque-ink transition uppercase tracking-wider cursor-pointer">
+                        Règlement
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bénévoles -->
+            <div class="bg-white text-venasque-ink border-2 border-venasque-sand p-8 sm:p-10 rounded-3xl shadow-xl flex flex-col justify-between text-center md:text-left">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-venasque-sand text-venasque-espresso inline-block mb-4">Team PAPA • Solidarité</span>
+                    <h3 class="text-3xl sm:text-4xl font-black mb-4 uppercase tracking-tight text-venasque-espresso">Devenir Bénévole</h3>
+                    <p class="text-sm font-medium text-venasque-muted leading-relaxed mb-6">
+                        Envie de vivre la course de l'intérieur ? Signaleur sur les sentiers, tenue de ravitaillement, accueil dossards ou buvette avec le Foyer Laïque : chaque coup de main aide directement l'école de Venasque !
+                    </p>
+                </div>
+                <button type="button" onclick="preselectContact('Devenir Bénévole - Trail de Venasque 2027')" class="w-full sm:w-auto bg-venasque-espresso text-white px-8 py-4 rounded-2xl font-extrabold text-sm hover:bg-venasque-terracotta transition shadow-lg uppercase tracking-wider cursor-pointer">
+                    Rejoindre l'équipe bénévoles
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ORGANISATEURS & PARTENAIRES (Structure fidèle à l'affiche officielle) -->
+    <section id="partenaires" class="py-16 sm:py-20 bg-venasque-cream border-b border-venasque-border text-center">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+            <!-- Organisé par -->
+            <div>
+                <p class="font-script text-3xl text-venasque-terracotta mb-6">Organisé par</p>
+                <div class="flex flex-wrap justify-center items-center gap-6 sm:gap-10">
+                    <div class="bg-white hover:border-venasque-terracotta border border-venasque-border rounded-2xl px-6 py-4 transition duration-300 shadow-sm">
+                        <img src="logo_foyer_laique.png" alt="Foyer Laïque de Venasque" class="h-12 md:h-14 w-auto object-contain">
+                    </div>
+                    <div class="bg-white hover:border-venasque-terracotta border border-venasque-border rounded-2xl px-6 py-4 transition duration-300 shadow-sm flex items-center gap-3">
+                        <img src="logo_papa_team_running.png" alt="PAPA Team Running" class="h-12 md:h-14 w-auto object-contain rounded-full">
+                        <span class="font-extrabold text-xs uppercase tracking-wider text-venasque-espresso hidden sm:inline">PAPA Team Running</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avec la participation de -->
+            <div class="pt-6 border-t border-venasque-border/70">
+                <h2 class="text-[11px] font-extrabold mb-8 text-venasque-muted uppercase tracking-[0.4em] italic">Avec la participation de</h2>
+                <div class="flex flex-wrap justify-center items-center gap-6 sm:gap-10">
+                    <div class="bg-white hover:border-venasque-terracotta border border-venasque-border rounded-2xl px-6 py-4 transition duration-300 shadow-sm flex items-center gap-3">
+                        <span class="w-2.5 h-2.5 rounded-full bg-venasque-terracotta"></span>
+                        <span class="font-black text-base sm:text-lg tracking-wider text-venasque-espresso uppercase">Département de Vaucluse</span>
+                    </div>
+                    <div class="bg-white hover:border-venasque-terracotta border border-venasque-border rounded-2xl px-6 py-4 transition duration-300 shadow-sm flex items-center gap-3">
+                        <span class="w-2.5 h-2.5 rounded-full bg-venasque-ochre"></span>
+                        <span class="font-black text-base sm:text-lg tracking-wider text-venasque-espresso uppercase">Mairie de Venasque</span>
+                    </div>
+                    <div class="bg-venasque-ink hover:border-venasque-terracotta border border-venasque-border rounded-2xl px-6 py-3.5 transition duration-300 shadow-sm" title="Running Conseil Le Pontet">
+                        <img src="logo_running_conseil.png" alt="Running Conseil Le Pontet" class="h-9 md:h-11 w-auto object-contain">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="py-20 sm:py-24 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <div class="bg-venasque-cream p-6 sm:p-10 rounded-3xl border border-venasque-border shadow-lg text-center">
+                <span class="text-venasque-terracotta text-xs font-extrabold uppercase tracking-[0.3em]">Team PAPA • Foyer Laïque</span>
+                <h2 class="text-3xl sm:text-4xl font-black mt-2 mb-3 uppercase text-venasque-espresso">Contactez-nous</h2>
+                <p class="text-venasque-muted mb-8 text-sm italic">Une question sur les parcours, les inscriptions ou le bénévolat ? L'équipe vous répond.</p>
+
+                <form id="contactForm" onsubmit="handleContactSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                    <input type="text" id="contactNom" required placeholder="Prénom &amp; Nom" class="bg-white p-4 rounded-xl outline-none focus:border-venasque-terracotta transition text-sm text-venasque-ink placeholder-venasque-muted/70 border border-venasque-border">
+                    <input type="email" id="contactEmail" required placeholder="Votre adresse Email" class="bg-white p-4 rounded-xl outline-none focus:border-venasque-terracotta transition text-sm text-venasque-ink placeholder-venasque-muted/70 border border-venasque-border">
+                    <select id="contactSujet" class="bg-white p-4 rounded-xl md:col-span-2 outline-none focus:border-venasque-terracotta transition text-sm text-venasque-ink border border-venasque-border">
+                        <option value="Question Parcours - Trail de Venasque 2027">Sujet : Question sur les parcours (7 km / 13 km / 24 km / Marche 7 km)</option>
+                        <option value="Alerte ouverture inscriptions 2027">Sujet : Être prévenu à l'ouverture des inscriptions 2027</option>
+                        <option value="Devenir Bénévole - Trail de Venasque 2027">Sujet : Devenir Bénévole (Team PAPA)</option>
+                        <option value="Album Photos @PapaTeamRunning">Sujet : Photos 2026 (fichier original / question)</option>
+                        <option value="Partenariat / Presse">Sujet : Partenariat / Autre demande</option>
+                    </select>
+                    <textarea id="contactMessage" required placeholder="Votre message..." class="bg-white p-4 rounded-xl md:col-span-2 h-32 outline-none focus:border-venasque-terracotta transition text-sm text-venasque-ink placeholder-venasque-muted/70 border border-venasque-border"></textarea>
+
+                    <button type="submit" class="md:col-span-2 bg-venasque-terracotta text-white py-4 rounded-xl font-extrabold uppercase text-xs tracking-widest hover:bg-venasque-ink transition mt-1 cursor-pointer shadow-md">
+                        Ouvrir mon application mail pour envoyer
+                    </button>
+                </form>
+
+                <div id="contactFeedback" class="hidden mt-4 p-4 rounded-2xl bg-venasque-sand/60 border border-venasque-terracotta/40 text-xs text-venasque-ink">
+                    Votre messagerie a été sollicitée. Si rien ne s'est ouvert automatiquement, vous pouvez écrire directement à <strong class="text-venasque-terracotta">vincent.buisson10@gmail.com</strong>.
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-venasque-border flex flex-wrap justify-center items-center gap-3 text-xs text-venasque-muted">
+                    <span>Email direct : <strong class="text-venasque-espresso">vincent.buisson10@gmail.com</strong></span>
+                    <button type="button" id="copyEmailBtn" onclick="copyContactEmail()" class="px-3 py-1.5 rounded-lg bg-white border border-venasque-border hover:bg-venasque-terracotta hover:text-white hover:border-venasque-terracotta text-venasque-espresso font-bold uppercase text-[10px] tracking-wider transition cursor-pointer">
+                        Copier l'email
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER AVEC LOGO -->
+    <footer class="py-12 text-center border-t border-venasque-border bg-venasque-ink text-white flex flex-col items-center px-4">
+        <div class="mb-6 opacity-90 hover:opacity-100 transition-opacity duration-300 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 365 60" class="h-12 md:h-14 w-auto">
+                <path d="M 5,45 L 23,30 L 23,25 L 27,25 L 27,15 L 31,10 L 35,15 L 35,25 L 46,25 L 50,30 L 60,45 L 80,45" fill="none" stroke="#F2DFD0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M 12,55 Q 35,50 25,40 T 48,25" fill="none" stroke="#C06448" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+                <text x="95" y="33" font-family="Montserrat, sans-serif" font-weight="900" font-size="21" fill="#D59A7B" letter-spacing="0.5">TRAIL DE VENASQUE</text>
+                <text x="96" y="49" font-family="Montserrat, sans-serif" font-weight="700" font-size="10.5" fill="#F2DFD0" letter-spacing="3.5">DIMANCHE 7 MARS 2027</text>
+            </svg>
+        </div>
+
+        <div class="text-venasque-sand/65 text-[10px] font-bold uppercase tracking-[0.25em] sm:tracking-[0.35em]">
+            © 2027 Trail de Venasque • Foyer Laïque &amp; Team PAPA • <a href="https://www.facebook.com/permalink.php?story_fbid=pfbid0Aa7PAofJFfN9Ak6gLuW417QZiuDpCYMg7dDeHLXNMiF3t2R754XwyU17EYkS4vejl&amp;id=100092419316904" target="_blank" rel="noopener noreferrer" class="underline decoration-venasque-ochre/60 hover:text-white transition">Photos Team PAPA</a>
+        </div>
+    </footer>
+
+    <!-- BOUTON RETOUR EN HAUT -->
+    <button id="backToTopBtn" type="button" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Retour en haut" class="hidden fixed bottom-5 right-5 z-40 w-12 h-12 rounded-2xl bg-venasque-terracotta text-white shadow-xl border border-white/25 flex items-center justify-center font-black text-xl hover:bg-venasque-ink hover:scale-105 transition cursor-pointer">
+        ↑
+    </button>
+
+    <script>
+        // === COMPTE À REBOURS (7 MARS 2027 - 08h30) ===
+        function updateCountdown() {
+            const raceDate = new Date('2027-03-07T08:30:00+01:00').getTime();
+            const now = Date.now();
+            const diff = raceDate - now;
+
+            if (diff <= 0) {
+                document.getElementById('cd-days').innerText = '00';
+                document.getElementById('cd-hours').innerText = '00';
+                document.getElementById('cd-minutes').innerText = '00';
+                document.getElementById('cd-seconds').innerText = '00';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
+            document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
+            document.getElementById('cd-minutes').innerText = String(minutes).padStart(2, '0');
+            document.getElementById('cd-seconds').innerText = String(seconds).padStart(2, '0');
+        }
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // === LOGIQUE DE LA FAQ ===
+        function toggleFaq(button) {
+            const content = button.nextElementSibling;
+            const chevron = button.querySelector('.chevron');
+            const isHidden = content.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
+            button.setAttribute('aria-expanded', String(!isHidden));
+        }
+
+        function toggleMarcheInfo() {
+            const box = document.getElementById('zoneMarche');
+            const wasHidden = box.classList.toggle('hidden');
+            if (!wasHidden) {
+                box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // === LOGIQUE DES PROFILS & CARTE INTERACTIVE GPX ===
+        let graphInstance = null;
+        let leafletMap = null;
+        let currentTileLayer = null;
+        let gpxCasing = null;
+        let gpxPolyline = null;
+        let startMarker = null;
+        let endMarker = null;
+        let hoverMarker = null;
+        let activeMapStyle = 'ign';
+        let activeCourseKey = '24k';
+
+        const mapTileConfigs = {
+            ign: {
+                url: 'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}',
+                options: {
+                    attribution: '&copy; IGN / Géoplateforme',
+                    maxNativeZoom: 19,
+                    maxZoom: 20
+                }
+            },
+            topo: {
+                url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+                options: {
+                    attribution: 'Tiles &copy; Esri &mdash; IGN, OpenStreetMap contributors',
+                    maxZoom: 19
+                }
+            },
+            satellite: {
+                url: 'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}',
+                options: {
+                    attribution: '&copy; IGN Ortho / Géoplateforme',
+                    maxNativeZoom: 19,
+                    maxZoom: 20
+                }
+            },
+            osm: {
+                url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                options: {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    maxZoom: 19
+                }
+            }
+        };
+
+        const tracesGPX = {
+            '24k': {
+                titre: 'Profil Altimétrique & Carte - 24 km',
+                fichier: 'VENASQUE_2027_24K.gpx',
+                distLabel: '24,8 km',
+                deniveleLabel: '~880 m D+',
+                altLabel: '189 m / 633 m',
+                ravitoLabel: '08h30 • 2 + Arr.',
+                yMin: 150,
+                yMax: 670,
+                stepX: 5
+            },
+            '13k': {
+                titre: 'Profil Altimétrique & Carte - 13 km',
+                fichier: 'VENASQUE_2027_12K.gpx',
+                distLabel: '12,7 km',
+                deniveleLabel: '~450 m D+',
+                altLabel: '182 m / 413 m',
+                ravitoLabel: '09h30 • 1-2 + Arr.',
+                yMin: 150,
+                yMax: 450,
+                stepX: 2
+            },
+            '7k': {
+                titre: 'Profil Altimétrique & Carte - 7 km',
+                fichier: 'VENASQUE_2027_7K.gpx',
+                distLabel: '6,9 km',
+                deniveleLabel: '~210 m D+',
+                altLabel: '203 m / 382 m',
+                ravitoLabel: '10h00 • 1 Eau + Arr.',
+                yMin: 180,
+                yMax: 420,
+                stepX: 1
+            },
+            'marche7k': {
+                titre: 'Profil Altimétrique & Carte - Marche 7 km',
+                fichier: 'VENASQUE_2027_MARCHE_7K.gpx',
+                distLabel: '7,3 km',
+                deniveleLabel: '~160 m D+',
+                altLabel: '254 m / 383 m',
+                ravitoLabel: '11h00 • Sans chrono',
+                yMin: 220,
+                yMax: 420,
+                stepX: 1
+            }
+        };
+
+        function changerFondCarte(styleKey) {
+            activeMapStyle = styleKey;
+            document.querySelectorAll('.map-style-btn').forEach(btn => {
+                if (btn.getAttribute('data-mapstyle') === styleKey) {
+                    btn.className = 'map-style-btn px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-venasque-terracotta text-white cursor-pointer transition';
+                } else {
+                    btn.className = 'map-style-btn px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-venasque-cream border border-venasque-border text-venasque-espresso hover:border-venasque-terracotta cursor-pointer transition';
+                }
+            });
+
+            if (!leafletMap || typeof L === 'undefined') return;
+            const cfg = mapTileConfigs[styleKey] || mapTileConfigs.ign;
+            if (currentTileLayer) {
+                leafletMap.removeLayer(currentTileLayer);
+            }
+            currentTileLayer = L.tileLayer(cfg.url, cfg.options).addTo(leafletMap);
+        }
+
+        function recentrerCarte() {
+            if (leafletMap && gpxPolyline) {
+                leafletMap.fitBounds(gpxPolyline.getBounds(), { padding: [30, 30] });
+            }
+        }
+
+        function updateMapHoverCursor(pt, distanceKey) {
+            if (!leafletMap || !pt) return;
+            const point = (typeof pt.lat === 'number' && typeof pt.lon === 'number')
+                ? [pt.lat, pt.lon]
+                : null;
+            if (!point) return;
+
+            if (!hoverMarker) {
+                hoverMarker = L.circleMarker(point, {
+                    radius: 8,
+                    fillColor: '#FFFFFF',
+                    fillOpacity: 1,
+                    color: '#C06448',
+                    weight: 4
+                }).addTo(leafletMap);
+            } else {
+                hoverMarker.setLatLng(point);
+                if (!leafletMap.hasLayer(hoverMarker)) {
+                    hoverMarker.addTo(leafletMap);
+                }
+            }
+        }
+
+        function clearMapHoverCursor() {
+            if (leafletMap && hoverMarker) {
+                leafletMap.removeLayer(hoverMarker);
+                hoverMarker = null;
+            }
+        }
+
+        function chargerTraceCarte(distanceKey) {
+            try {
+                if (typeof L === 'undefined') return;
+
+                if (!leafletMap) {
+                    leafletMap = L.map('mapGPX', {
+                        zoomControl: true,
+                        scrollWheelZoom: false
+                    }).setView([43.99475, 5.14835], 13);
+
+                    const cfg = mapTileConfigs[activeMapStyle];
+                    currentTileLayer = L.tileLayer(cfg.url, cfg.options).addTo(leafletMap);
+                }
+
+                if (typeof gpxCoords === 'undefined' || !gpxCoords[distanceKey]) return;
+                const coords = gpxCoords[distanceKey];
+                if (coords.length === 0) return;
+
+                if (gpxCasing) leafletMap.removeLayer(gpxCasing);
+                if (gpxPolyline) leafletMap.removeLayer(gpxPolyline);
+                if (startMarker) leafletMap.removeLayer(startMarker);
+                if (endMarker) leafletMap.removeLayer(endMarker);
+                clearMapHoverCursor();
+
+                gpxCasing = L.polyline(coords, {
+                    color: '#FFFFFF',
+                    weight: 7.5,
+                    opacity: 0.85
+                }).addTo(leafletMap);
+
+                gpxPolyline = L.polyline(coords, {
+                    color: '#C06448',
+                    weight: 4.5,
+                    opacity: 0.98
+                }).addTo(leafletMap);
+
+                startMarker = L.circleMarker(coords[0], {
+                    radius: 7,
+                    fillColor: '#16a34a',
+                    fillOpacity: 1,
+                    color: '#ffffff',
+                    weight: 2
+                }).addTo(leafletMap).bindPopup("<b>Départ</b><br>Place de la Fontaine, Venasque");
+
+                endMarker = L.circleMarker(coords[coords.length - 1], {
+                    radius: 7,
+                    fillColor: '#5C3E31',
+                    fillOpacity: 1,
+                    color: '#ffffff',
+                    weight: 2
+                }).addTo(leafletMap).bindPopup("<b>Arrivée</b><br>Place de la Fontaine, Venasque");
+
+                leafletMap.fitBounds(gpxPolyline.getBounds(), { padding: [30, 30] });
+                setTimeout(() => {
+                    leafletMap.invalidateSize();
+                    leafletMap.fitBounds(gpxPolyline.getBounds(), { padding: [30, 30] });
+                }, 200);
+            } catch (err) {
+                console.error("Erreur lors du chargement de la carte :", err);
+            }
+        }
+
+        function genererProfilExact(distanceSelectionnee, shouldScroll = true) {
+            try {
+                const trace = tracesGPX[distanceSelectionnee];
+                if (!trace) return;
+                activeCourseKey = distanceSelectionnee;
+
+                const profileData = (typeof gpxProfiles !== 'undefined' && gpxProfiles[distanceSelectionnee]) ? gpxProfiles[distanceSelectionnee] : [];
+                const zoneMarche = document.getElementById('zoneMarche');
+                if (zoneMarche) {
+                    zoneMarche.classList.toggle('hidden', distanceSelectionnee !== 'marche7k');
+                }
+
+                document.querySelectorAll('.course-card').forEach(card => {
+                    card.classList.remove('ring-2', 'ring-offset-2', 'ring-offset-venasque-cream', 'ring-venasque-terracotta', 'border-venasque-terracotta');
+                });
+                const activeCard = document.getElementById('card-' + distanceSelectionnee);
+                if (activeCard) {
+                    activeCard.classList.add('ring-2', 'ring-offset-2', 'ring-offset-venasque-cream', 'ring-venasque-terracotta', 'border-venasque-terracotta');
+                }
+
+                document.querySelectorAll('.course-tab').forEach(tab => {
+                    if (tab.getAttribute('data-tab') === distanceSelectionnee) {
+                        tab.className = 'course-tab px-4 py-2 rounded-lg text-xs font-extrabold uppercase transition cursor-pointer bg-venasque-terracotta text-white';
+                    } else {
+                        tab.className = 'course-tab px-4 py-2 rounded-lg text-xs font-extrabold uppercase transition cursor-pointer text-venasque-espresso hover:text-venasque-terracotta';
+                    }
+                });
+
+                document.getElementById('titre-graphique').innerText = trace.titre;
+                document.getElementById('kpi-distance').innerText = trace.distLabel;
+                document.getElementById('kpi-denivele').innerText = trace.deniveleLabel;
+                document.getElementById('kpi-altitude').innerText = trace.altLabel;
+                document.getElementById('kpi-ravito').innerText = trace.ravitoLabel;
+
+                const btnGPX = document.getElementById('btnTelechargerGPX');
+                btnGPX.href = trace.fichier;
+                btnGPX.download = trace.fichier;
+
+                if (typeof Chart !== 'undefined' && profileData.length > 0) {
+                    if (graphInstance) graphInstance.destroy();
+                    const canvas = document.getElementById('chartRealiste');
+                    const ctx = canvas.getContext('2d');
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 380);
+                    gradient.addColorStop(0, 'rgba(192, 100, 72, 0.38)');
+                    gradient.addColorStop(1, 'rgba(192, 100, 72, 0.03)');
+                    const maxDistKm = profileData[profileData.length - 1].x;
+
+                    graphInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            datasets: [{
+                                label: 'Altitude (m)',
+                                data: profileData,
+                                borderColor: '#C06448',
+                                backgroundColor: gradient,
+                                fill: true,
+                                tension: 0.22,
+                                pointRadius: 0,
+                                pointHoverRadius: 6,
+                                pointHoverBackgroundColor: '#ffffff',
+                                pointHoverBorderColor: '#C06448',
+                                pointHoverBorderWidth: 3,
+                                pointHitRadius: 14,
+                                borderWidth: 2.5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'nearest',
+                                axis: 'x',
+                                intersect: false
+                            },
+                            onHover: (event, elements) => {
+                                if (elements && elements.length > 0) {
+                                    const pt = profileData[elements[0].index];
+                                    if (pt) updateMapHoverCursor(pt, distanceSelectionnee);
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'linear',
+                                    min: 0,
+                                    max: maxDistKm,
+                                    title: { display: true, text: 'Distance officielle 2027 (km)', color: '#7E6256', font: { family: 'Montserrat', size: 11, weight: 'bold' } },
+                                    ticks: { color: '#5C3E31', stepSize: trace.stepX || 2 },
+                                    grid: { color: 'rgba(92, 62, 49, 0.08)' }
+                                },
+                                y: {
+                                    min: trace.yMin || 150,
+                                    max: trace.yMax || 680,
+                                    title: { display: true, text: 'Altitude (m)', color: '#7E6256', font: { family: 'Montserrat', size: 11, weight: 'bold' } },
+                                    ticks: { color: '#5C3E31' },
+                                    grid: { color: 'rgba(92, 62, 49, 0.08)' }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: '#3A251D',
+                                    borderColor: '#C06448',
+                                    borderWidth: 1,
+                                    padding: 10,
+                                    titleFont: { family: 'Montserrat', size: 13, weight: 'bold' },
+                                    bodyFont: { family: 'Montserrat', size: 12, weight: 'bold' },
+                                    callbacks: {
+                                        title: (c) => `Km ${c[0].parsed.x.toFixed(1)}`,
+                                        label: (c) => ` ${c[0].parsed.y} m d'altitude`
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                chargerTraceCarte(distanceSelectionnee);
+
+                if (shouldScroll) {
+                    document.getElementById('zoneGraphique').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } catch (error) {
+                console.error("Erreur lors de la création du profil :", error);
+            }
+        }
+
+        // === DONNÉES ET FILTRAGE DES RÉSULTATS (RÉELLES DONNÉES ÉDITION 2026) ===
+        const resultatsData = [
+            // 30K Top Finishers
+            { rang: 1, nom: "GONZALEZ Bastien", dossard: 1625, distance: "30K", cat: "SEM", temps: "02:27:40", club: "US le pontet" },
+            { rang: 2, nom: "RICHAUD Jeremy", dossard: 1520, distance: "30K", cat: "SEM", temps: "02:27:40", club: "-" },
+            { rang: 3, nom: "IVAN Ferretti", dossard: 1597, distance: "30K", cat: "M0M", temps: "02:28:25", club: "As Cavaillon" },
+            { rang: 4, nom: "MEYER Julien", dossard: 1649, distance: "30K", cat: "M2M", temps: "02:36:19", club: "RunningConseilAvignon" },
+            { rang: 5, nom: "MEUDEC Kilian", dossard: 1665, distance: "30K", cat: "SEM", temps: "02:38:51", club: "Ventoux Trail club" },
+            { rang: 6, nom: "BRUNET Pierre", dossard: 1604, distance: "30K", cat: "M2M", temps: "02:39:22", club: "Les Mollets Pétillants" },
+            { rang: 7, nom: "CRAMOISAN Joffrey", dossard: 1641, distance: "30K", cat: "M0M", temps: "02:39:22", club: "Ventoux Trail Club" },
+
+            // 20K Top Finishers
+            { rang: 1, nom: "CARRIE Théophile", dossard: 1106, distance: "20K", cat: "ESM", temps: "01:23:47", club: "ASVA" },
+            { rang: 2, nom: "BARAZZUOL Filippo", dossard: 1165, distance: "20K", cat: "M0M", temps: "01:25:43", club: "-" },
+            { rang: 3, nom: "LENORMAND Guillaume", dossard: 1032, distance: "20K", cat: "M3M", temps: "01:33:01", club: "UYN FRANCE / Cryo" },
+            { rang: 4, nom: "MARTINEZ Jean-Baptiste", dossard: 1174, distance: "20K", cat: "SEM", temps: "01:33:36", club: "La Loriolade" },
+            { rang: 5, nom: "GANDON Matthieu", dossard: 1135, distance: "20K", cat: "SEM", temps: "01:34:48", club: "Avignon Le Pontet Tri" },
+            { rang: 6, nom: "LAVERGNE Grégory", dossard: 1007, distance: "20K", cat: "M4M", temps: "01:35:19", club: "Courir à Aramon" },
+            { rang: 7, nom: "DELHOMME Bertrand", dossard: 1190, distance: "20K", cat: "M0M", temps: "01:38:53", club: "Dentelles" },
+            { rang: 8, nom: "MOURGUES Arthur", dossard: 1193, distance: "20K", cat: "SEM", temps: "01:39:29", club: "Ménerbes Running" },
+
+            // 10K Top Finishers
+            { rang: 1, nom: "RODRIGUEZ Kevin", dossard: 597, distance: "10K", cat: "M0M", temps: "00:42:04", club: "Canikaze84" },
+            { rang: 2, nom: "BARANGER Hadrien", dossard: 662, distance: "10K", cat: "SEM", temps: "00:47:18", club: "-" },
+            { rang: 3, nom: "CONSTANTIN Alexandre", dossard: 509, distance: "10K", cat: "JUM", temps: "00:48:11", club: "-" },
+            { rang: 4, nom: "HARNISCH Maxime", dossard: 643, distance: "10K", cat: "SEM", temps: "00:48:25", club: "-" },
+            { rang: 5, nom: "MARCEL Emile", dossard: 640, distance: "10K", cat: "M1M", temps: "00:51:19", club: "sainte jalle" },
+            { rang: 6, nom: "REJO Yvan", dossard: 600, distance: "10K", cat: "M2M", temps: "00:51:47", club: "-" },
+            { rang: 7, nom: "BERGER Denis", dossard: 594, distance: "10K", cat: "M1M", temps: "00:52:22", club: "-" },
+            { rang: 8, nom: "MARCHAL David", dossard: 624, distance: "10K", cat: "M0M", temps: "00:53:08", club: "-" },
+            { rang: 9, nom: "MARIE Roman", dossard: 551, distance: "10K", cat: "M0M", temps: "00:55:45", club: "Menerbes Running" },
+            { rang: 10, nom: "COMPARAT Maroussia", dossard: 675, distance: "10K", cat: "M1F", temps: "00:57:34", club: "-" }
+        ];
+
+        let currentDistFilter = "30K";
+
+        function getRankBadge(rang) {
+            if (rang === 1) return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-extrabold">🥇 #1</span>';
+            if (rang === 2) return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-300 font-extrabold">🥈 #2</span>';
+            if (rang === 3) return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-900 border border-orange-300 font-extrabold">🥉 #3</span>';
+            return `<span class="font-bold text-venasque-terracotta">#${rang}</span>`;
+        }
+
+        function renderResultsTable() {
+            const tableBody = document.getElementById('resultatsTableBody');
+            const mobileBody = document.getElementById('resultatsMobileBody');
+            const searchInputEl = document.getElementById('searchResultats');
+            const searchInput = searchInputEl.value.toLowerCase().trim();
+            const noResults = document.getElementById('noResultsMessage');
+            const clearBtn = document.getElementById('clearSearchBtn');
+
+            clearBtn.classList.toggle('hidden', searchInput.length === 0);
+
+            tableBody.innerHTML = "";
+            mobileBody.innerHTML = "";
+
+            const filtered = resultatsData
+                .filter(row => row.distance === currentDistFilter)
+                .filter(row => (
+                    row.nom.toLowerCase().includes(searchInput) ||
+                    row.club.toLowerCase().includes(searchInput) ||
+                    row.dossard.toString().includes(searchInput) ||
+                    row.cat.toLowerCase().includes(searchInput)
+                ))
+                .sort((a, b) => a.rang - b.rang);
+
+            document.getElementById('resultsCountBadge').innerText = `${filtered.length} affiché${filtered.length > 1 ? 's' : ''}`;
+
+            filtered.forEach(row => {
+                const badgeClass = row.distance === '30K'
+                    ? 'bg-venasque-terracotta text-white'
+                    : row.distance === '20K'
+                        ? 'bg-venasque-sand text-venasque-espresso'
+                        : 'bg-venasque-cream text-venasque-espresso border border-venasque-border';
+
+                // Desktop Row
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-venasque-border/60 hover:bg-venasque-cream/70 transition duration-150";
+                tr.innerHTML = `
+                    <td class="py-4 px-6">${getRankBadge(row.rang)}</td>
+                    <td class="py-4 px-6 text-venasque-ink font-bold">${row.nom}</td>
+                    <td class="py-4 px-6 text-venasque-muted">${row.dossard}</td>
+                    <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${badgeClass}">${row.distance}</span></td>
+                    <td class="py-4 px-6 text-venasque-espresso">${row.cat}</td>
+                    <td class="py-4 px-6 font-mono font-bold text-venasque-espresso">${row.temps}</td>
+                    <td class="py-4 px-6 text-venasque-muted italic">${row.club}</td>
+                `;
+                tableBody.appendChild(tr);
+
+                // Mobile Card
+                const card = document.createElement('div');
+                card.className = "p-4 flex justify-between items-center gap-3";
+                card.innerHTML = `
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            ${getRankBadge(row.rang)}
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${badgeClass}">${row.distance}</span>
+                            <span class="text-[11px] text-venasque-muted">${row.cat} • #${row.dossard}</span>
+                        </div>
+                        <div class="text-sm font-black text-venasque-espresso truncate">${row.nom}</div>
+                        <div class="text-xs text-venasque-muted italic truncate">${row.club === '-' ? 'Individuel' : row.club}</div>
+                    </div>
+                    <div class="shrink-0 font-mono font-black text-sm text-venasque-terracotta bg-venasque-cream px-3 py-1.5 rounded-xl border border-venasque-border">
+                        ${row.temps}
+                    </div>
+                `;
+                mobileBody.appendChild(card);
+            });
+
+            noResults.classList.toggle('hidden', filtered.length > 0);
+        }
+
+        function setResultFilter(filter) {
+            currentDistFilter = filter;
+            document.querySelectorAll('.btn-res-filter').forEach(btn => {
+                btn.className = btn.getAttribute('data-filter') === filter
+                    ? "btn-res-filter px-6 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-venasque-terracotta text-white transition hover:scale-105 cursor-pointer"
+                    : "btn-res-filter px-6 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-venasque-cream text-venasque-espresso border border-venasque-border transition hover:border-venasque-terracotta hover:scale-105 cursor-pointer";
+            });
+            renderResultsTable();
+        }
+
+        function searchResultats() {
+            renderResultsTable();
+        }
+
+        function clearResultSearch() {
+            document.getElementById('searchResultats').value = '';
+            renderResultsTable();
+        }
+
+        // === LIGHTBOX GALLERY AVEC NAVIGATION ===
+        const galleryItems = [
+            { src: 'image_f67662.jpg', caption: "Venasque Perché — Vue panoramique du village classé parmi les Plus Beaux Villages de France" },
+            { src: 'venasque1.jpg', caption: "Cœur du Village — Le clocher de l'église et la montée vers le centre historique" },
+            { src: 'venasque2.jpg', caption: "Sentiers Calcaires — Passage rocailleux et cairn sur les hauteurs de Venasque" },
+            { src: 'venasque3.jpg', caption: "Falaises & Ventoux — Traversée boisée face au Géant de Provence" }
+        ];
+        let currentLightboxIndex = 0;
+        let isGalleryMode = true;
+
+        function showLightboxModal(imgSrc, caption, showArrows) {
+            const lightbox = document.getElementById('photoLightbox');
+            document.getElementById('lightboxImg').src = imgSrc;
+            document.getElementById('lightboxCaption').innerText = caption;
+
+            ['lbPrevBtn', 'lbNextBtn', 'lbPrevMobile', 'lbNextMobile'].forEach(id => {
+                const el = document.getElementById(id);
+                if (showArrows) {
+                    el.classList.remove('opacity-0', 'pointer-events-none');
+                } else {
+                    el.classList.add('opacity-0', 'pointer-events-none');
+                }
+            });
+
+            document.getElementById('lightboxCounter').innerText = showArrows
+                ? `Photo ${currentLightboxIndex + 1} / ${galleryItems.length}`
+                : 'Affiche Officielle 2027';
+
+            lightbox.classList.remove('hidden');
+            setTimeout(() => lightbox.classList.remove('opacity-0'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openLightboxByIndex(index) {
+            isGalleryMode = true;
+            currentLightboxIndex = (index + galleryItems.length) % galleryItems.length;
+            const item = galleryItems[currentLightboxIndex];
+            showLightboxModal(item.src, item.caption, true);
+        }
+
+        function openLightbox(imgSrc, caption) {
+            isGalleryMode = false;
+            showLightboxModal(imgSrc, caption, false);
+        }
+
+        function navigateLightbox(delta) {
+            if (!isGalleryMode) return;
+            openLightboxByIndex(currentLightboxIndex + delta);
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('photoLightbox');
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => lightbox.classList.add('hidden'), 300);
+            document.body.style.overflow = '';
+        }
+
+        // === MODAL RÈGLEMENT ===
+        function openReglementModal() {
+            document.getElementById('reglementModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReglementModal() {
+            document.getElementById('reglementModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // === CONTACT & PRÉ-SÉLECTION ===
+        function preselectContact(subject) {
+            const select = document.getElementById('contactSujet');
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === subject) {
+                    select.selectedIndex = i;
+                    break;
+                }
+            }
+            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => document.getElementById('contactNom').focus(), 500);
+        }
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            const nom = document.getElementById('contactNom').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            const sujet = document.getElementById('contactSujet').value;
+            const msg = document.getElementById('contactMessage').value.trim();
+
+            const body = `Nom : ${nom}\nEmail : ${email}\n\nMessage :\n${msg}`;
+            const mailtoUrl = `mailto:vincent.buisson10@gmail.com?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoUrl;
+
+            document.getElementById('contactFeedback').classList.remove('hidden');
+        }
+
+        function copyContactEmail() {
+            const btn = document.getElementById('copyEmailBtn');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText('vincent.buisson10@gmail.com').then(() => {
+                    btn.innerText = 'Copié !';
+                    setTimeout(() => { btn.innerText = "Copier l'email"; }, 2500);
+                });
+            }
+        }
+
+        // === LOGIQUE DU MENU MOBILE ===
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const btn = document.getElementById('mobileMenuBtn');
+            const iconPath = document.getElementById('hamburgerPath');
+            const isHidden = menu.classList.contains('hidden');
+
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                setTimeout(() => {
+                    menu.classList.remove('opacity-0', '-translate-y-3');
+                    menu.classList.add('opacity-100', 'translate-y-0');
+                }, 10);
+                iconPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+                btn.setAttribute('aria-expanded', 'true');
+                document.body.style.overflow = 'hidden';
+            } else {
+                menu.classList.remove('opacity-100', 'translate-y-0');
+                menu.classList.add('opacity-0', '-translate-y-3');
+                setTimeout(() => menu.classList.add('hidden'), 300);
+                iconPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+                btn.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
+        }
+        document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+
+        // === FERMETURE MODALES & RACCOURCIS CLAVIER ===
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('photoLightbox')) closeLightbox();
+            if (e.target === document.getElementById('reglementModal')) closeReglementModal();
+        });
+
+        window.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('photoLightbox');
+            const reglement = document.getElementById('reglementModal');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if (e.key === 'Escape') {
+                if (!lightbox.classList.contains('hidden')) closeLightbox();
+                if (!reglement.classList.contains('hidden')) closeReglementModal();
+                if (!mobileMenu.classList.contains('hidden')) toggleMobileMenu();
+            } else if (!lightbox.classList.contains('hidden')) {
+                if (e.key === 'ArrowRight') navigateLightbox(1);
+                if (e.key === 'ArrowLeft') navigateLightbox(-1);
+            }
+        });
+
+        // === SCROLL-SPY NAVIGATION & BOUTON RETOUR EN HAUT ===
+        function initScrollFeatures() {
+            const backBtn = document.getElementById('backToTopBtn');
+            window.addEventListener('scroll', () => {
+                backBtn.classList.toggle('hidden', window.scrollY < 450);
+            }, { passive: true });
+
+            const sections = document.querySelectorAll('header[id], section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const id = entry.target.getAttribute('id');
+                            navLinks.forEach(link => {
+                                link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                            });
+                        }
+                    });
+                }, { rootMargin: '-35% 0px -55% 0px' });
+
+                sections.forEach(sec => observer.observe(sec));
+            }
+        }
+
+        // === INITIALISATION AU CHARGEMENT ===
+        window.addEventListener('DOMContentLoaded', () => {
+            renderResultsTable();
+            initScrollFeatures();
+            genererProfilExact('24k', false);
+
+            const chartCanvas = document.getElementById('chartRealiste');
+            if (chartCanvas) {
+                chartCanvas.addEventListener('mouseleave', clearMapHoverCursor);
+            }
+        });
+    </script>
+</body>
+</html>

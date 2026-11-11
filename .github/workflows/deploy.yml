@@ -1,0 +1,59 @@
+name: Deploy Trail de Venasque to Hostinger
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-trail-venasque
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🗜️ Archive static site
+        run: |
+          tar -czf site.tar.gz \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.gitignore' \
+            --exclude='README.md' \
+            --exclude='site.tar.gz' \
+            .
+
+      - name: 🔐 Vérification de la clé SSH
+        run: |
+          if [ -z "${{ secrets.HOSTINGER_SSH_KEY }}" ]; then
+            echo "❌ Le secret HOSTINGER_SSH_KEY n'est pas encore configuré."
+            echo "Ajoutez-le dans Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      - name: 🚀 Deploy to Hostinger subdomain
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          HOST: ${{ secrets.HOSTINGER_HOST }}
+          PORT: ${{ secrets.HOSTINGER_PORT }}
+          USER: ${{ secrets.HOSTINGER_USER }}
+          REMOTE_DIR: ${{ secrets.HOSTINGER_REMOTE_DIR }}
+        run: |
+          TARGET_HOST="${HOST:-89.117.169.57}"
+          TARGET_PORT="${PORT:-65002}"
+          TARGET_USER="${USER:-u488549652}"
+          TARGET_DIR="${REMOTE_DIR:-domains/runvaucluse.fr/public_html/trail-de-venasque}"
+
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          ssh -p "$TARGET_PORT" -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new "$TARGET_USER@$TARGET_HOST" "mkdir -p '$TARGET_DIR'"
+          scp -P "$TARGET_PORT" -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new site.tar.gz "$TARGET_USER@$TARGET_HOST:$TARGET_DIR/"
+          ssh -p "$TARGET_PORT" -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new "$TARGET_USER@$TARGET_HOST" "cd '$TARGET_DIR' && tar -xzf site.tar.gz && rm site.tar.gz"
+
+          echo "✅ Déploiement réussi sur https://trail-de-venasque.runvaucluse.fr/"

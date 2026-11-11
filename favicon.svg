@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <defs>
+        <linearGradient id="terracottaBg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#CC704C" />
+            <stop offset="100%" stop-color="#B05338" />
+        </linearGradient>
+    </defs>
+
+    <!-- Badge Terracotta (DA Affiche Officielle 2027) -->
+    <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#terracottaBg)" />
+
+    <!-- Falaise & base brun espresso -->
+    <path d="M 2,40 L 62,40 L 62,47 C 62,55.3 55.3,62 47,62 L 17,62 C 8.7,62 2,55.3 2,47 Z" fill="#5C3E31" />
+
+    <!-- Silhouette géométrique du village perché de Venasque -->
+    <polygon points="10,40 16,32 16,27 23,27 23,23 28,23 28,16 32,10 36,16 36,22 44,22 44,26 50,26 54,40" fill="#FAF5F0" />
+    <!-- Facettes sable (style géométrique de l'affiche) -->
+    <polygon points="32,10 36,16 36,40 32,40" fill="#E8C5AA" />
+    <polygon points="44,22 44,40 54,40 50,26 44,26" fill="#E8C5AA" />
+    <!-- Contour brun espresso -->
+    <path d="M 9,40 L 16,32 L 16,27 L 23,27 L 23,23 L 28,23 L 28,16 L 32,10 L 36,16 L 36,22 L 44,22 L 44,26 L 50,26 L 55,40" fill="none" stroke="#3A251D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Sentier sinueux vers le village -->
+    <path d="M 18,57 C 32,53 20,47 33,44 C 42,42 40,39 35,37" fill="none" stroke="#FAF5F0" stroke-width="3.6" stroke-linecap="round" />
+
+    <!-- Liseré intérieur discret -->
+    <rect x="3" y="3" width="58" height="58" rx="14" fill="none" stroke="#FAF5F0" stroke-width="1.2" opacity="0.28" />
+</svg>
